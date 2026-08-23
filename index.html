@@ -134,13 +134,11 @@
   <!-- Animated Floating Cyber Particle Nodes SVG Background -->
   <div class="absolute inset-0 pointer-events-none overflow-hidden opacity-35 z-0">
     <svg class="w-full h-full" viewBox="0 0 1000 600" preserveAspectRatio="none">
-      <!-- Data Stream Lines -->
       <line x1="80" y1="100" x2="250" y2="220" stroke="#06b6d4" strokeWidth="1" strokeDasharray="4 4" opacity="0.6"/>
       <line x1="920" y1="120" x2="750" y2="240" stroke="#a855f7" strokeWidth="1" strokeDasharray="4 4" opacity="0.6"/>
       <line x1="150" y1="480" x2="320" y2="380" stroke="#10b981" strokeWidth="1" strokeDasharray="4 4" opacity="0.6"/>
       <line x1="850" y1="480" x2="680" y2="380" stroke="#f43f5e" strokeWidth="1" strokeDasharray="4 4" opacity="0.6"/>
 
-      <!-- Glowing Nodes -->
       <circle cx="80" cy="100" r="4" fill="#06b6d4" />
       <circle cx="920" cy="120" r="4" fill="#a855f7" />
       <circle cx="150" cy="480" r="4" fill="#10b981" />
@@ -181,7 +179,6 @@
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
     );
 
-    // --- MOCK SAMPLE DATA FOR DEMO ---
     const sampleMessages = [
       {
         label: "Phishing SMS",
@@ -224,44 +221,50 @@
         return () => clearInterval(timer);
       }, []);
 
-      const runMessageScan = (customText) => {
+      // REAL DATASET BACKEND SCAN FUNCTION
+      const runMessageScan = async (customText) => {
         const textToScan = customText !== undefined ? customText : messageInput;
         if (!textToScan.trim()) return;
         setMessageScanning(true);
         setMessageResult(null);
 
-        setTimeout(() => {
+        try {
+          const response = await fetch('http://localhost:5000/api/analyze-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: textToScan })
+          });
+
+          const data = await response.json();
           setMessageScanning(false);
-          const isSafe = textToScan.includes('Legitimate') || textToScan.includes('internal server');
-          if (isSafe) {
+
+          if (response.ok) {
+            const risk = data.riskPercentage;
+            const isCritical = risk >= 70;
+            const isSuspicious = risk >= 40 && risk < 70;
+
             setMessageResult({
-              score: 6,
-              severity: 'SAFE PASS',
-              confidence: '98.7%',
-              statusColor: 'text-sentinel-green',
-              bgBorder: 'border-sentinel-green/30 bg-emerald-950/20',
-              findings: [
-                { title: 'No Malicious URLs Detected', desc: 'All referenced domains match verified internal infrastructure signatures.', contrib: 0 },
-                { title: 'Normal Linguistic Sentiment', desc: 'No high-urgency psychological coercion or phishing triggers detected.', contrib: 0 }
-              ],
-              recommendation: 'Message passed all AI threat filters. Safe to interact with.'
+              score: risk,
+              severity: data.classification,
+              confidence: `${risk}% Dataset Probability`,
+              statusColor: isCritical ? 'text-sentinel-rose' : (isSuspicious ? 'text-sentinel-amber' : 'text-sentinel-green'),
+              bgBorder: isCritical ? 'border-sentinel-rose/30 bg-rose-950/20' : (isSuspicious ? 'border-sentinel-amber/30 bg-amber-950/20' : 'border-sentinel-green/30 bg-emerald-950/20'),
+              findings: data.indicators.map((ind, i) => ({
+                title: `Dataset Indicator #${i+1}`,
+                desc: ind,
+                contrib: Math.round(risk / data.indicators.length)
+              })),
+              recommendation: isCritical 
+                ? 'BLOCK & QUARANTINE: High probability match with trained phishing dataset signatures.' 
+                : 'Message passed dataset filters safely.'
             });
           } else {
-            setMessageResult({
-              score: 94,
-              severity: 'CRITICAL THREAT',
-              confidence: '97.2%',
-              statusColor: 'text-sentinel-rose',
-              bgBorder: 'border-sentinel-rose/30 bg-rose-950/20',
-              findings: [
-                { title: 'CREDENTIAL HARVESTING LINK', desc: 'Contains domain (secure-update-verify.com) flagged in global threat databases.', contrib: 38 },
-                { title: 'URGENCY & COERCION TACTIC', desc: 'Psychological threat trigger used to bypass user vigilance ("account locked in 2h").', contrib: 32 },
-                { title: 'UNVERIFIED SENDER SIGNATURE', desc: 'SPF & DKIM authentication failed for the origin gateway.', contrib: 24 }
-              ],
-              recommendation: 'BLOCK & QUARANTINE: Do not click any links or provide credentials. Report immediately to SOC team.'
-            });
+            alert(`Analysis failed: ${data.message}`);
           }
-        }, 1800);
+        } catch (err) {
+          setMessageScanning(false);
+          alert('ERROR: Python backend offline or unreachable.');
+        }
       };
 
       const handleImageSelect = (e) => {
@@ -293,9 +296,9 @@
             findings: [
               { title: 'NEURAL MESH INCONSISTENCY', desc: 'Diffusion artifacts detected in facial border pixels and iris illumination symmetry.', contrib: 42 },
               { title: 'EXIF METADATA STRIPPED', desc: 'Original camera hardware metadata removed, indicating artificial generation.', contrib: 28 },
-              { title: 'GAUSSIAN NOISE ANOMALY', desc: 'Unnatural frequency distribution characteristic of AI diffusion models (Midjourney/GAN).', contrib: 21 }
+              { title: 'GAUSSIAN NOISE ANOMALY', desc: 'Unnatural frequency distribution characteristic of AI diffusion models.', contrib: 21 }
             ],
-            recommendation: 'REJECT CONTENT: High probability of synthetic AI deepfake manipulation. Do not trust for identity check.'
+            recommendation: 'REJECT CONTENT: High probability of synthetic AI deepfake manipulation.'
           });
         }, 2000);
       };
@@ -355,7 +358,6 @@
             {/* CENTERED NAVIGATION TAB BAR */}
             <div className="flex justify-center mb-8 max-w-xl mx-auto">
               <nav className="flex items-center gap-2 bg-bg-panel/95 backdrop-blur-xl p-2 rounded-2xl border border-border-highlight shadow-2xl">
-                
                 <button
                   onClick={() => setActiveTab('message')}
                   className={`flex items-center gap-2.5 px-6 py-3 rounded-xl font-semibold text-xs tracking-wider uppercase transition-all ${
@@ -401,7 +403,7 @@
                   <div className="flex justify-between items-start">
                     <div>
                       <div className="font-mono text-xs text-sentinel-cyan font-bold uppercase tracking-wider mb-1">
-                        PHISHING & COERCION ENGINE
+                        DATASET PHISHING & SPAM ENGINE
                       </div>
                       <h2 className="text-xl font-bold text-text-primary">Inspect Suspicious Message</h2>
                     </div>
@@ -434,7 +436,7 @@
 
                   <div className="flex justify-between items-center pt-2">
                     <span className="font-mono text-xs text-text-muted">
-                      {messageInput.length} characters ready for scanning
+                      {messageInput.length} characters ready for dataset scoring
                     </span>
                     
                     <button
@@ -445,7 +447,7 @@
                       {messageScanning ? (
                         <>
                           <span className="w-2.5 h-2.5 rounded-full bg-bg-obsidian pulse-glow"></span>
-                          <span>ANALYZING TEXT...</span>
+                          <span>ANALYZING DATASET...</span>
                         </>
                       ) : (
                         <>
@@ -477,21 +479,21 @@
                           </svg>
                           <div className="absolute inset-0 flex flex-col items-center justify-center">
                             <span className={`font-mono text-4xl font-extrabold ${messageResult.statusColor}`}>
-                              {messageResult.score}
+                              {messageResult.score}%
                             </span>
-                            <span className="font-mono text-[10px] text-text-muted">/ 100</span>
+                            <span className="font-mono text-[10px] text-text-muted">RISK LEVEL</span>
                           </div>
                         </div>
 
                         <span className={`font-mono text-sm font-bold tracking-widest uppercase mt-2 ${messageResult.statusColor}`}>
                           {messageResult.severity}
                         </span>
-                        <span className="font-mono text-xs text-text-muted mt-1">AI Confidence: {messageResult.confidence}</span>
+                        <span className="font-mono text-xs text-text-muted mt-1">Confidence: {messageResult.confidence}</span>
                       </div>
 
                       <div className="glass-panel p-6 md:col-span-2 flex flex-col gap-4">
                         <div className="font-mono text-xs text-text-secondary font-bold uppercase tracking-wider">
-                          THREAT FINDINGS & HEURISTIC ANALYSIS
+                          DATASET CLASSIFICATION & HEURISTIC SIGNATURES
                         </div>
                         
                         <div className="flex flex-col gap-3">
@@ -499,11 +501,6 @@
                             <div key={idx} className="glass-surface p-4 flex flex-col gap-1">
                               <div className="flex justify-between items-center">
                                 <span className="font-bold text-text-primary text-sm">{idx+1}. {item.title}</span>
-                                {item.contrib > 0 && (
-                                  <span className="font-mono text-xs font-bold text-sentinel-rose bg-rose-950/40 px-2 py-0.5 rounded border border-rose-500/30">
-                                    +{item.contrib} Risk
-                                  </span>
-                                )}
                               </div>
                               <p className="text-xs text-text-secondary leading-relaxed">{item.desc}</p>
                             </div>
@@ -537,7 +534,6 @@
                       DEEPFAKE & STEGANOGRAPHY HEURISTIC ENGINE
                     </div>
                     <h2 className="text-xl font-bold text-text-primary">Inspect Digital Image & Media</h2>
-                    <p className="text-xs text-text-secondary mt-1">Upload images to detect generative AI facial artifacts, stripped EXIF metadata, and embedded hidden payloads.</p>
                   </div>
 
                   <div className="relative border-2 border-dashed border-border-highlight hover:border-sentinel-cyan/60 rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer bg-bg-surface/50 transition-all">
@@ -591,7 +587,6 @@
                   </div>
                 </div>
 
-                {/* RESULTS DISPLAY */}
                 {imageResult && (
                   <div className="flex flex-col gap-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -631,26 +626,11 @@
                             <div key={idx} className="glass-surface p-4 flex flex-col gap-1">
                               <div className="flex justify-between items-center">
                                 <span className="font-bold text-text-primary text-sm">{idx+1}. {item.title}</span>
-                                <span className="font-mono text-xs font-bold text-sentinel-rose bg-rose-950/40 px-2 py-0.5 rounded border border-rose-500/30">
-                                  +{item.contrib}% AI Risk
-                                </span>
                               </div>
                               <p className="text-xs text-text-secondary leading-relaxed">{item.desc}</p>
                             </div>
                           ))}
                         </div>
-                      </div>
-                    </div>
-
-                    <div className="p-5 rounded-2xl border border-sentinel-rose/30 bg-rose-950/20 flex items-start gap-4">
-                      <div className="p-2 rounded-xl bg-rose-950/50 text-sentinel-rose shrink-0 mt-0.5">
-                        <IconAlertTriangle size={20} />
-                      </div>
-                      <div>
-                        <div className="font-mono text-xs font-bold text-sentinel-rose uppercase tracking-wider mb-1">
-                          RECOMMENDED SOC ACTION
-                        </div>
-                        <p className="text-sm font-medium text-text-primary leading-relaxed">{imageResult.recommendation}</p>
                       </div>
                     </div>
                   </div>
@@ -669,9 +649,6 @@
                       </div>
                       <h2 className="text-xl font-bold text-text-primary">Recent Scans & Heuristic Results</h2>
                     </div>
-                    <span className="font-mono text-xs text-sentinel-green flex items-center gap-1.5 font-bold">
-                      <span className="w-2 h-2 rounded-full bg-sentinel-green pulse-glow"></span> AUDIT ACTIVE
-                    </span>
                   </div>
 
                   <div className="divide-y divide-border-subtle font-mono text-xs">
@@ -689,7 +666,7 @@
                           </span>
                         </span>
                         <span className="col-span-4 text-text-secondary truncate font-sans">{log.target}</span>
-                        <span className="col-span-2 text-right font-bold text-sentinel-rose">{log.status} ({log.score})</span>
+                        <span className="col-span-2 text-right font-bold text-sentinel-rose">{log.status} ({log.score}%)</span>
                       </div>
                     ))}
                   </div>
@@ -703,13 +680,12 @@
           <footer className="h-11 bg-bg-panel/90 backdrop-blur-xl border-t border-border-subtle px-8 flex items-center justify-between shrink-0 font-mono text-xs text-text-muted z-30">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-sentinel-green pulse-glow"></span>
-              <span>SYSTEM HEURISTICS:</span>
-              <span className="text-sentinel-green font-bold">OPERATIONAL (100% ONLINE)</span>
+              <span>DATASET MODEL STATUS:</span>
+              <span className="text-sentinel-green font-bold">LOADED & ACTIVE</span>
             </div>
 
             <div className="flex items-center gap-8 text-xs">
               <span>MESSAGES ANALYZED: <strong className="text-text-primary">1,284</strong></span>
-              <span>IMAGES FORENSICS: <strong className="text-text-primary">642</strong></span>
               <span>CRITICAL THREATS DETECTED: <strong className="text-sentinel-rose">89</strong></span>
             </div>
           </footer>
