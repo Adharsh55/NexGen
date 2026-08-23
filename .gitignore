@@ -17,3 +17,14 @@ ENV/
 # IDE / Editor files
 .vscode/
 .idea/
+
+# Node / Web Frontend
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+
+# IDE / Editor files
+.vscode
+.idea

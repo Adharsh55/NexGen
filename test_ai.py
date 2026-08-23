@@ -1,6 +1,16 @@
 import unittest
 import json
 from ai_engine import clean_and_parse_json, FALLBACK_RESPONSE
+from google.genai import types
+from ai_engine import clean_and_parse_json, prepare_image_part, FALLBACK_RESPONSE
+
+class MockUploadedFile:
+    def __init__(self, content: bytes, file_type: str = "image/png"):
+        self.content = content
+        self.type = file_type
+
+    def getvalue(self) -> bytes:
+        return self.content
 
 class TestAIEngine(unittest.TestCase):
 
@@ -32,6 +42,14 @@ class TestAIEngine(unittest.TestCase):
         self.assertEqual(parsed["risk_level"], "Suspicious")
         self.assertEqual(len(parsed["warning_indicators"]), 1)
 
+    def test_json_embedded_in_text(self):
+        embedded_text = """Here is the fraud analysis result:
+{"risk_score": 75, "risk_level": "High Risk", "warning_indicators": ["Telegram contact only"], "psychological_tactics": ["Scarcity"], "summary": "Unverified contact."}
+Hope this helps!"""
+        parsed = clean_and_parse_json(embedded_text)
+        self.assertEqual(parsed["risk_score"], 75)
+        self.assertEqual(parsed["risk_level"], "High Risk")
+
     def test_malformed_json_fallback(self):
         malformed_input = "This is not JSON content at all {{{ risk_score: 90"
         parsed = clean_and_parse_json(malformed_input)
@@ -45,6 +63,16 @@ class TestAIEngine(unittest.TestCase):
 
         parsed_empty = clean_and_parse_json("")
         self.assertEqual(parsed_empty, FALLBACK_RESPONSE)
+
+    def test_prepare_image_part_uploaded_file(self):
+        mock_file = MockUploadedFile(b"fake_image_bytes", "image/jpeg")
+        part = prepare_image_part(mock_file)
+        self.assertIsInstance(part, types.Part)
+
+    def test_prepare_image_part_bytes(self):
+        raw_bytes = b"fake_png_data"
+        part = prepare_image_part(raw_bytes, mime_type="image/png")
+        self.assertIsInstance(part, types.Part)
 
 if __name__ == "__main__":
     unittest.main()
