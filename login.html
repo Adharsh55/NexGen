@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SENTINEL-X | Analyst Authentication</title>
+  <title>SENTINEL-X | SOC Cyber Command Login</title>
   
-  <!-- Fonts -->
+  <!-- Premium Google Fonts: Outfit, Plus Jakarta Sans, JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -17,59 +17,138 @@
       theme: {
         extend: {
           colors: {
-            'bg-base': '#09090b',
-            'bg-panel': '#0f1117',
-            'bg-surface': '#141720',
-            'bg-hover': '#1a1f2e',
-            'border-subtle': '#1e2330',
-            'border-default': '#252b3a',
-            'text-primary': '#e2e8f0',
+            'bg-obsidian': '#050609',
+            'bg-panel': '#0b0d14',
+            'bg-surface': '#111420',
+            'border-subtle': '#1a1f30',
+            'border-highlight': '#2a334e',
+            'text-primary': '#f8fafc',
             'text-secondary': '#94a3b8',
             'text-muted': '#475569',
-            'sentinel-green': '#22c55e',
-            'sentinel-orange': '#f97316',
-            'sentinel-red': '#ef4444',
-            'sentinel-accent': '#38bdf8',
+            'sentinel-green': '#10b981',
+            'sentinel-cyan': '#06b6d4',
+            'sentinel-rose': '#f43f5e',
+            'sentinel-violet': '#a855f7',
+            'sentinel-amber': '#f59e0b',
           },
           fontFamily: {
+            sans: ['Outfit', 'Plus Jakarta Sans', 'sans-serif'],
             mono: ['JetBrains Mono', 'monospace'],
-            sans: ['Inter', 'sans-serif'],
           }
         }
       }
     }
   </script>
 
-  <!-- Custom styles -->
+  <!-- Custom Styles for Ultra-Futuristic Cyber Aesthetics -->
   <style>
     body {
-      background-color: #09090b;
-      color: #e2e8f0;
-      font-family: 'Inter', sans-serif;
+      background-color: #050609;
+      color: #f8fafc;
+      font-family: 'Outfit', sans-serif;
       overflow: hidden;
       margin: 0;
       height: 100vh;
+      position: relative;
     }
 
-    .cyber-bg {
-      background-color: #09090b;
+    /* DYNAMIC CYBER MESH BACKGROUND WITH NEON GRADIENTS */
+    .cyber-command-bg {
+      background-color: #050609;
       background-image: 
-        radial-gradient(circle at 50% 30%, rgba(239, 68, 68, 0.12) 0%, transparent 65%),
-        radial-gradient(circle at 80% 80%, rgba(56, 189, 248, 0.05) 0%, transparent 50%),
-        linear-gradient(to right, rgba(30, 35, 48, 0.25) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(30, 35, 48, 0.25) 1px, transparent 1px);
-      background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+        radial-gradient(circle at 50% 25%, rgba(6, 182, 212, 0.22) 0%, transparent 60%),
+        radial-gradient(circle at 10% 90%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 90% 10%, rgba(244, 63, 94, 0.15) 0%, transparent 50%),
+        linear-gradient(to right, rgba(26, 31, 48, 0.4) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(26, 31, 48, 0.4) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 36px 36px, 36px 36px;
     }
 
-    .panel { background-color: rgba(15, 17, 23, 0.9); backdrop-filter: blur(16px); border: 1px solid #252b3a; border-radius: 4px; }
-    .panel-surface { background-color: rgba(20, 23, 32, 0.9); backdrop-filter: blur(16px); border: 1px solid #1e2330; border-radius: 4px; }
-    .btn-primary { background-color: rgba(239, 68, 68, 0.9); color: #ffffff; font-family: 'JetBrains Mono', monospace; font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; padding: 12px 24px; border-radius: 3px; border: 1px solid rgba(239, 68, 68, 0.6); transition: all 0.15s; cursor: pointer; }
-    .btn-primary:hover { background-color: #ef4444; border-color: #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
-    .input-field { background-color: #141720; border: 1px solid #252b3a; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 13px; border-radius: 3px; padding: 10px 14px; outline: none; width: 100%; }
-    .input-field:focus { border-color: rgba(56, 189, 248, 0.6); box-shadow: 0 0 10px rgba(56, 189, 248, 0.15); }
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-    .blink { animation: blink 1.5s ease-in-out infinite; }
-    .hero-glow { box-shadow: 0 0 60px rgba(239, 68, 68, 0.25); }
+    /* HOLOGRAPHIC GLASS CARD */
+    .holo-card {
+      background: rgba(11, 13, 20, 0.88);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(6, 182, 212, 0.35);
+      border-radius: 20px;
+      box-shadow: 
+        0 0 60px rgba(6, 182, 212, 0.18),
+        0 0 20px rgba(168, 85, 247, 0.1),
+        inset 0 0 30px rgba(6, 182, 212, 0.05);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .holo-card:hover {
+      border-color: rgba(6, 182, 212, 0.6);
+      box-shadow: 
+        0 0 80px rgba(6, 182, 212, 0.25),
+        0 0 30px rgba(168, 85, 247, 0.2),
+        inset 0 0 40px rgba(6, 182, 212, 0.08);
+    }
+
+    .input-field-cyber {
+      background: rgba(17, 20, 32, 0.9);
+      border: 1px solid #2a334e;
+      color: #f8fafc;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      border-radius: 12px;
+      padding: 14px 16px 14px 44px;
+      outline: none;
+      width: 100%;
+      transition: all 0.25s ease;
+    }
+    .input-field-cyber:focus {
+      border-color: #06b6d4;
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+      background: rgba(17, 20, 32, 1);
+    }
+
+    .btn-cyber-auth {
+      background: linear-gradient(135deg, #06b6d4 0%, #0284c7 50%, #3b82f6 100%);
+      color: #050609;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      padding: 16px 32px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 0 30px rgba(6, 182, 212, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-cyber-auth:hover {
+      background: linear-gradient(135deg, #22d3ee 0%, #06b6d4 50%, #60a5fa 100%);
+      box-shadow: 0 0 45px rgba(6, 182, 212, 0.8), 0 0 15px rgba(168, 85, 247, 0.4);
+      transform: translateY(-2px);
+    }
+
+    @keyframes radarSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .radar-ring { animation: radarSpin 10s linear infinite; }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.5; }
+    }
+    .pulse-glow { animation: pulseGlow 2s infinite ease-in-out; }
+
+    @keyframes laserSweep {
+      0% { transform: translateY(-100%); opacity: 0; }
+      50% { opacity: 1; }
+      100% { transform: translateY(100vh); opacity: 0; }
+    }
+    .laser-beam {
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(to right, transparent, rgba(6, 182, 212, 0.6), rgba(168, 85, 247, 0.6), transparent);
+      animation: laserSweep 6s ease-in-out infinite;
+      pointer-events: none;
+    }
   </style>
 
   <!-- React & Babel Standalone -->
@@ -77,28 +156,58 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-<body class="cyber-bg flex items-center justify-center min-h-screen p-4">
-  <div id="root" class="w-full flex items-center justify-center"></div>
+<body class="cyber-command-bg flex items-center justify-center min-h-screen p-4 relative">
+  
+  <!-- Laser Sweep Effect -->
+  <div class="laser-beam"></div>
+
+  <!-- Animated Floating Cyber Particle Nodes SVG Background -->
+  <div class="absolute inset-0 pointer-events-none overflow-hidden opacity-40">
+    <svg class="w-full h-full" viewBox="0 0 1000 600" preserveAspectRatio="none">
+      <defs>
+        <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.8" />
+          <stop offset="100%" stopColor="#06b6d4" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+
+      <!-- Connecting Lines -->
+      <line x1="120" y1="120" x2="280" y2="240" stroke="#06b6d4" strokeWidth="1" strokeDasharray="3 3" opacity="0.6"/>
+      <line x1="880" y1="140" x2="720" y2="260" stroke="#a855f7" strokeWidth="1" strokeDasharray="3 3" opacity="0.6"/>
+      <line x1="500" y1="520" x2="500" y2="380" stroke="#10b981" strokeWidth="1" strokeDasharray="3 3" opacity="0.6"/>
+      <line x1="200" y1="480" x2="350" y2="380" stroke="#f43f5e" strokeWidth="1" strokeDasharray="3 3" opacity="0.6"/>
+      <line x1="800" y1="460" x2="650" y2="380" stroke="#06b6d4" strokeWidth="1" strokeDasharray="3 3" opacity="0.6"/>
+
+      <!-- Glowing Nodes -->
+      <circle cx="120" cy="120" r="5" fill="#06b6d4" />
+      <circle cx="880" cy="140" r="5" fill="#a855f7" />
+      <circle cx="500" cy="520" r="5" fill="#10b981" />
+      <circle cx="200" cy="480" r="5" fill="#f43f5e" />
+      <circle cx="800" cy="460" r="5" fill="#06b6d4" />
+    </svg>
+  </div>
+
+  <div id="root" class="w-full flex items-center justify-center z-10"></div>
 
   <script type="text/babel">
     const { useState } = React;
 
-    const IconShield = ({ size=16 }) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2L4 6v6c0 5.1 3.4 9.9 8 11 4.6-1.1 8-5.9 8-11V6L12 2z"/>
+    const IconShield = ({ size=24 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/>
       </svg>
     );
 
-    const IconUser = ({ size=16 }) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    const IconUser = ({ size=18 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     );
 
-    const IconKey = ({ size=16 }) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.778-7.778Zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+    const IconKey = ({ size=18 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.778-7.778Zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
     );
 
-    const IconLock = ({ size=16 }) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    const IconFingerprint = ({ size=20 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M14 13.12c0 2.38-.6 4.41-1.3 5.88"/><path d="M16 11.26A6 6 0 0 0 10 7a5.9 5.9 0 0 0-3.3 1"/><path d="M18 10a8 8 0 0 0-14 3.73"/><path d="M12 2a10 10 0 0 0-9.4 13.4"/><path d="M12 18a2.5 2.5 0 0 0 2.5-2.5c0-.98-.1-2.42-.26-3.86"/></svg>
     );
 
     function LoginPage() {
@@ -109,34 +218,54 @@
 
       const handleLogin = (e) => {
         e.preventDefault();
-        setStatusMsg('VERIFYING MFA SECURITY TOKEN...');
+        setStatusMsg('INITIALIZING BIOMETRIC SCAN...');
         setTimeout(() => {
-          setStatusMsg('DECRYPTING WORKSTATION KEYS...');
+          setStatusMsg('VERIFYING MFA SECURITY TOKEN...');
           setTimeout(() => {
-            window.location.href = 'index.html';
-          }, 1000);
-        }, 1000);
+            setStatusMsg('DECRYPTING COMMAND WORKSTATION...');
+            setTimeout(() => {
+              window.location.href = 'index.html';
+            }, 900);
+          }, 900);
+        }, 900);
       };
 
       return (
-        <div className="w-full max-w-md panel p-8 flex flex-col gap-6 hero-glow border border-border-default">
-          {/* Logo */}
-          <div className="flex flex-col items-center text-center">
-            <div className="w-16 h-16 rounded-full bg-red-950/40 border border-sentinel-red/50 flex items-center justify-center text-sentinel-red mb-3">
-              <IconShield size={36} />
+        <div className="w-full max-w-md holo-card p-9 flex flex-col gap-6 relative">
+          
+          {/* Top Ticker Status Bar */}
+          <div className="flex items-center justify-between font-mono text-[10px] text-text-muted border-b border-border-subtle pb-3">
+            <span className="flex items-center gap-1.5 text-sentinel-green font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-sentinel-green pulse-glow"></span> GATEWAY: ONLINE
+            </span>
+            <span className="text-sentinel-cyan font-semibold">ENCRYPTION: AES-256</span>
+            <span className="text-text-muted">NODE: SX-99</span>
+          </div>
+
+          {/* Holographic Logo Header */}
+          <div className="flex flex-col items-center text-center relative py-2">
+            
+            {/* Spinning Radar Ring Behind Shield */}
+            <div className="relative w-20 h-20 flex items-center justify-center mb-3">
+              <div className="absolute inset-0 rounded-full border border-dashed border-sentinel-cyan/40 radar-ring"></div>
+              <div className="absolute inset-2 rounded-full border border-sentinel-violet/30"></div>
+              <div className="p-4 rounded-2xl bg-cyan-950/70 border border-sentinel-cyan/60 text-sentinel-cyan shadow-xl shadow-cyan-500/30 z-10">
+                <IconShield size={32} />
+              </div>
             </div>
-            <h1 className="font-mono text-2xl font-bold tracking-widest text-text-primary">
-              SENTINEL<span className="text-sentinel-red">-X</span>
+
+            <h1 className="text-3xl font-extrabold tracking-widest text-text-primary uppercase leading-tight">
+              SENTINEL<span className="text-sentinel-cyan">-X</span>
             </h1>
-            <div className="font-mono text-[10px] text-sentinel-accent tracking-widest uppercase mt-1">
-              SOC ANALYST AUTHENTICATION TERMINAL
+            <div className="font-mono text-[10px] text-sentinel-cyan tracking-widest uppercase font-bold mt-1 bg-cyan-950/40 px-3 py-1 rounded-full border border-cyan-500/30">
+              SOC CYBER COMMAND PORTAL
             </div>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleLogin} className="flex flex-col gap-4 font-mono text-xs">
+          {/* Auth Form */}
+          <form onSubmit={handleLogin} className="flex flex-col gap-5">
             <div>
-              <label className="block text-text-muted text-[11px] mb-1.5 uppercase tracking-wider">
+              <label className="block font-mono text-[11px] text-text-secondary mb-2 uppercase tracking-wider font-bold">
                 Analyst Clearance ID / Email
               </label>
               <div className="relative">
@@ -146,14 +275,14 @@
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder="analyst@sentinel-x.io"
-                  className="input-field py-2.5 pl-9"
+                  className="input-field-cyber"
                 />
-                <span className="absolute left-3 top-3 text-text-muted"><IconUser size={14} /></span>
+                <span className="absolute left-4 top-4 text-text-muted"><IconUser size={18} /></span>
               </div>
             </div>
 
             <div>
-              <label className="block text-text-muted text-[11px] mb-1.5 uppercase tracking-wider">
+              <label className="block font-mono text-[11px] text-text-secondary mb-2 uppercase tracking-wider font-bold">
                 Security Access Key / Password
               </label>
               <div className="relative">
@@ -163,20 +292,20 @@
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="input-field py-2.5 pl-9"
+                  className="input-field-cyber"
                 />
-                <span className="absolute left-3 top-3 text-text-muted"><IconKey size={14} /></span>
+                <span className="absolute left-4 top-4 text-text-muted"><IconKey size={18} /></span>
               </div>
             </div>
 
             <div>
-              <label className="block text-text-muted text-[11px] mb-1.5 uppercase tracking-wider">
+              <label className="block font-mono text-[11px] text-text-secondary mb-2 uppercase tracking-wider font-bold">
                 Security Clearance Level
               </label>
               <select
                 value={clearance}
                 onChange={e => setClearance(e.target.value)}
-                className="input-field py-2.5 bg-bg-surface text-text-primary outline-none cursor-pointer"
+                className="input-field-cyber pl-4 bg-bg-surface text-text-primary outline-none cursor-pointer font-sans font-semibold"
               >
                 <option value="Level 1 — Triage Operator">Level 1 — Triage Operator</option>
                 <option value="Level 2 — Threat Investigator">Level 2 — Threat Investigator</option>
@@ -184,34 +313,35 @@
               </select>
             </div>
 
-            <div className="flex justify-between items-center text-[11px] text-text-muted pt-1">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" defaultChecked className="rounded border-border-default accent-sentinel-red" />
-                <span>Persist Session Token</span>
+            <div className="flex justify-between items-center font-mono text-[11px] text-text-muted pt-1">
+              <label className="flex items-center gap-2 cursor-pointer hover:text-text-secondary transition-colors">
+                <input type="checkbox" defaultChecked className="rounded border-border-highlight accent-sentinel-cyan" />
+                <span>Persist MFA Token</span>
               </label>
-              <a href="#" className="text-sentinel-accent hover:underline">Reset Key?</a>
+              <a href="#" className="text-sentinel-cyan hover:underline font-semibold">Reset Access Key?</a>
             </div>
 
+            {/* Status indicator during auth */}
             {statusMsg && (
-              <div className="panel-surface p-3 text-center text-sentinel-accent text-xs flex items-center justify-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-sentinel-accent blink"></span>
-                <span>{statusMsg}</span>
+              <div className="bg-cyan-950/50 p-3 rounded-xl text-center text-sentinel-cyan font-mono text-xs flex items-center justify-center gap-2 border border-sentinel-cyan/40 shadow-lg">
+                <span className="w-2.5 h-2.5 rounded-full bg-sentinel-cyan pulse-glow"></span>
+                <span className="font-bold tracking-wider">{statusMsg}</span>
               </div>
             )}
 
             <button
               type="submit"
               disabled={!!statusMsg}
-              className="btn-primary py-3 text-sm font-semibold tracking-widest mt-2 flex items-center justify-center gap-2"
+              className="btn-cyber-auth mt-2 flex items-center justify-center gap-3"
             >
-              <IconLock size={16} />
+              <IconFingerprint size={22} />
               <span>AUTHENTICATE ANALYST</span>
             </button>
           </form>
 
           {/* Footer */}
-          <div className="text-center font-mono text-[10px] text-text-muted border-t border-border-subtle pt-4">
-            RESTRICTED SYSTEM — AUTHORIZED SOC PERSONNEL ONLY
+          <div className="text-center font-mono text-[10px] text-text-muted border-t border-border-subtle pt-4 tracking-wider">
+            RESTRICTED TERMINAL — AUTHORIZED SOC PERSONNEL ONLY
           </div>
         </div>
       );
