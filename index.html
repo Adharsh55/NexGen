@@ -68,9 +68,7 @@
     @keyframes pulseDot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
     .pulse-dot { animation: pulseDot 2s ease-in-out infinite; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
-    .hero-glow {
-      box-shadow: 0 0 60px rgba(239, 68, 68, 0.12);
-    }
+    .nav-glow { box-shadow: 0 0 25px rgba(239, 68, 68, 0.12); }
   </style>
 
   <!-- React & Babel Standalone -->
@@ -93,7 +91,7 @@
     const IconHome = ({ size=16 }) => (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     );
-    const IconOverview = ({ size=16 }) => (
+    const IconDashboard = ({ size=16 }) => (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
     );
     const IconAnalyzer = ({ size=16 }) => (
@@ -184,14 +182,13 @@
 
     // --- APP COMPONENT ---
     function App() {
-      const [page, setPage] = useState('home'); // Default to landing home
+      const [page, setPage] = useState('home');
       const [time, setTime] = useState(new Date());
-      const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
       // Analyzer State
       const [analyzerTab, setAnalyzerTab] = useState('URL');
       const [analyzerInput, setAnalyzerInput] = useState('');
-      const [analyzerState, setAnalyzerState] = useState('idle'); // idle, analyzing, done
+      const [analyzerState, setAnalyzerState] = useState('idle');
       const [analysisTarget, setAnalysisTarget] = useState('example-login.com');
 
       // Alerts Filter & Search
@@ -244,611 +241,621 @@ RECOMMENDED ACTIONS:
         document.body.removeChild(a);
       };
 
+      const navItems = [
+        { id: 'home', label: 'Home', icon: <IconHome /> },
+        { id: 'dashboard', label: 'Dashboard', icon: <IconDashboard /> },
+        { id: 'analyzer', label: 'Threat Analyzer', icon: <IconAnalyzer /> },
+        { id: 'alerts', label: 'Alert Center', icon: <IconAlerts /> },
+        { id: 'activity', label: 'Activity', icon: <IconActivity /> },
+        { id: 'investigation', label: 'Investigation', icon: <IconInvestigation /> },
+        { id: 'reports', label: 'Reports', icon: <IconReports /> },
+      ];
+
       return (
-        <div className="flex h-screen w-screen overflow-hidden bg-bg-base">
-          {/* SIDEBAR */}
-          <aside className={`flex flex-col h-full bg-bg-panel border-r border-border-subtle shrink-0 transition-all duration-200 ${sidebarCollapsed ? 'w-14' : 'w-52'}`}>
-            {/* Logo */}
-            <button 
-              onClick={() => setPage('home')}
-              className="flex items-center gap-2.5 px-3.5 h-12 border-b border-border-subtle shrink-0 hover:bg-bg-hover transition-colors text-left"
-            >
-              <div className="text-sentinel-red">
-                <IconShield size={20} />
-              </div>
-              {!sidebarCollapsed && (
-                <span className="font-mono text-sm font-semibold tracking-widest text-text-primary">
+        <div className="flex flex-col h-screen w-screen overflow-hidden bg-bg-base">
+          {/* TOPMOST HEADER BAR WITH CENTERED SENTINEL-X LOGO */}
+          <header className="h-14 bg-bg-panel border-b border-border-subtle grid grid-cols-3 items-center px-6 shrink-0 z-20">
+            {/* Left Col */}
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[10px] text-text-muted uppercase tracking-widest">SOC WORKSTATION</span>
+            </div>
+
+            {/* CENTER COL: SENTINEL-X LOGO IN THE TOPMOST CENTER */}
+            <div className="flex justify-center">
+              <button 
+                onClick={() => setPage('home')}
+                className="flex items-center gap-2.5 hover:opacity-90 transition-opacity"
+              >
+                <div className="text-sentinel-red">
+                  <IconShield size={22} />
+                </div>
+                <span className="font-mono text-base font-bold tracking-widest text-text-primary">
                   SENTINEL<span className="text-sentinel-red">-X</span>
                 </span>
-              )}
-            </button>
-
-            {/* Nav */}
-            <nav className="flex-1 py-3 px-2 flex flex-col gap-1 overflow-y-auto no-scrollbar">
-              {!sidebarCollapsed && <div className="label-mono px-2 py-1 mb-1">Navigation</div>}
-              {[
-                { id: 'home', label: 'Home', icon: <IconHome /> },
-                { id: 'overview', label: 'Overview', icon: <IconOverview /> },
-                { id: 'analyzer', label: 'Threat Analyzer', icon: <IconAnalyzer /> },
-                { id: 'alerts', label: 'Alert Center', icon: <IconAlerts /> },
-                { id: 'activity', label: 'Activity', icon: <IconActivity /> },
-                { id: 'investigation', label: 'Investigation', icon: <IconInvestigation /> },
-                { id: 'reports', label: 'Reports', icon: <IconReports /> },
-              ].map(item => (
-                <button
-                  key={item.id}
-                  onClick={() => setPage(item.id)}
-                  className={`flex items-center gap-3 px-2.5 py-2 rounded-sm font-mono text-xs tracking-wider uppercase transition-all ${
-                    page === item.id 
-                      ? 'text-text-primary bg-bg-hover border-l-2 border-sentinel-red font-medium' 
-                      : 'text-text-muted hover:text-text-primary hover:bg-bg-hover'
-                  } ${sidebarCollapsed ? 'justify-center' : ''}`}
-                >
-                  <span className="shrink-0">{item.icon}</span>
-                  {!sidebarCollapsed && <span>{item.label}</span>}
-                </button>
-              ))}
-            </nav>
-
-            {/* Bottom Status */}
-            <div className="border-t border-border-subtle px-3.5 py-3 shrink-0">
-              {!sidebarCollapsed ? (
-                <div>
-                  <div className="label-mono mb-1">System Status</div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-sentinel-green pulse-dot"></span>
-                    <span className="font-mono text-[11px] text-sentinel-green tracking-wider font-semibold">OPERATIONAL</span>
-                  </div>
-                  <div className="font-mono text-[10px] text-text-muted">v1.0.0</div>
-                </div>
-              ) : (
-                <div className="flex justify-center">
-                  <span className="w-2 h-2 rounded-full bg-sentinel-green pulse-dot"></span>
-                </div>
-              )}
+              </button>
             </div>
-          </aside>
 
-          {/* MAIN AREA */}
-          <div className="flex flex-col flex-1 min-w-0 h-full overflow-hidden">
-            {/* TOP BAR */}
-            <header className="h-12 bg-bg-panel border-b border-border-subtle flex items-center justify-between px-4 shrink-0">
-              <div className="flex items-center gap-3">
-                <span className="font-mono text-xs text-text-muted tracking-wider uppercase">Security Operations Center</span>
-                <span className="text-border-default">|</span>
-                <span className="font-mono text-xs text-text-secondary tracking-widest uppercase font-medium">{page}</span>
+            {/* Right Col: Live Status */}
+            <div className="flex items-center justify-end gap-4 font-mono text-xs">
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-sentinel-green blink"></span>
+                <span className="text-sentinel-green tracking-widest font-semibold">LIVE</span>
+                <span className="text-text-muted">Monitoring</span>
               </div>
+              <div className="h-4 w-px bg-border-default"></div>
+              <div className="text-text-muted tracking-wider">
+                {time.toLocaleTimeString('en-US', { hour12: false })}
+              </div>
+              <div className="h-4 w-px bg-border-default"></div>
+              <button className="relative text-text-muted hover:text-text-primary p-1">
+                <IconBell size={15} />
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-sentinel-red text-white text-[8px] rounded-full flex items-center justify-center">11</span>
+              </button>
+              <div className="w-7 h-7 rounded bg-bg-surface border border-border-default flex items-center justify-center text-text-muted">
+                <IconUser size={14} />
+              </div>
+            </div>
+          </header>
 
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-sentinel-green blink"></span>
-                  <span className="font-mono text-xs text-sentinel-green tracking-widest">LIVE</span>
-                  <span className="font-mono text-xs text-text-muted">Monitoring</span>
+          {/* MAIN CONTENT AREA */}
+          <main className="flex-1 overflow-y-auto p-6 pb-16 no-scrollbar">
+
+            {/* CENTERED NAVIGATION TAB BAR AT TOP OF BODY */}
+            <div className="flex justify-center mb-6 max-w-7xl mx-auto">
+              <nav className="flex items-center gap-1.5 bg-bg-panel p-1.5 rounded-lg border border-border-subtle shadow-lg nav-glow max-w-full overflow-x-auto">
+                {navItems.map(item => (
+                  <button
+                    key={item.id}
+                    onClick={() => setPage(item.id)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-md font-mono text-xs tracking-wider uppercase transition-all ${
+                      page === item.id 
+                        ? 'text-text-primary bg-sentinel-red/90 border border-sentinel-red shadow-md font-medium' 
+                        : 'text-text-muted hover:text-text-primary hover:bg-bg-hover'
+                    }`}
+                  >
+                    <span className="shrink-0">{item.icon}</span>
+                    <span>{item.label}</span>
+                  </button>
+                ))}
+              </nav>
+            </div>
+
+            {/* PAGE 0: HOME PAGE */}
+            {page === 'home' && (
+              <div className="flex flex-col gap-6 max-w-5xl mx-auto py-2">
+                {/* 3 Quick Access Feature Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full text-left">
+                  {/* Threat Analyzer Card */}
+                  <div 
+                    onClick={() => setPage('analyzer')}
+                    className="panel p-6 hover:border-sentinel-red/50 hover:bg-bg-hover transition-all duration-200 cursor-pointer group flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="p-2.5 rounded bg-red-950/40 text-sentinel-red border border-red-500/20">
+                          <IconAnalyzer size={20} />
+                        </span>
+                        <span className="text-text-muted group-hover:text-sentinel-red transition-colors">
+                          <IconArrowRight size={16} />
+                        </span>
+                      </div>
+                      <h3 className="font-mono text-base font-semibold text-text-primary mb-1">Threat Analyzer</h3>
+                      <p className="font-mono text-xs text-text-muted leading-relaxed">
+                        Inspect suspicious URLs, messages, IP addresses, or file payloads with real-time evidence scoring.
+                      </p>
+                    </div>
+                    <div className="mt-6 font-mono text-xs text-sentinel-red tracking-wider uppercase font-semibold">
+                      Launch Analyzer →
+                    </div>
+                  </div>
+
+                  {/* Dashboard Card */}
+                  <div 
+                    onClick={() => setPage('dashboard')}
+                    className="panel p-6 hover:border-sentinel-accent/50 hover:bg-bg-hover transition-all duration-200 cursor-pointer group flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="p-2.5 rounded bg-sky-950/40 text-sentinel-accent border border-sky-500/20">
+                          <IconDashboard size={20} />
+                        </span>
+                        <span className="text-text-muted group-hover:text-sentinel-accent transition-colors">
+                          <IconArrowRight size={16} />
+                        </span>
+                      </div>
+                      <h3 className="font-mono text-base font-semibold text-text-primary mb-1">Dashboard</h3>
+                      <p className="font-mono text-xs text-text-muted leading-relaxed">
+                        24h detection activity telemetry, threat distribution breakdown, and live event monitoring stream.
+                      </p>
+                    </div>
+                    <div className="mt-6 font-mono text-xs text-sentinel-accent tracking-wider uppercase font-semibold">
+                      View Dashboard →
+                    </div>
+                  </div>
+
+                  {/* Alert Center Card */}
+                  <div 
+                    onClick={() => setPage('alerts')}
+                    className="panel p-6 hover:border-sentinel-orange/50 hover:bg-bg-hover transition-all duration-200 cursor-pointer group flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="p-2.5 rounded bg-orange-950/40 text-sentinel-orange border border-orange-500/20">
+                          <IconAlerts size={20} />
+                        </span>
+                        <span className="text-text-muted group-hover:text-sentinel-orange transition-colors">
+                          <IconArrowRight size={16} />
+                        </span>
+                      </div>
+                      <h3 className="font-mono text-base font-semibold text-text-primary mb-1">Alert Center</h3>
+                      <p className="font-mono text-xs text-text-muted leading-relaxed">
+                        Triage, filter, and assign active security alerts with risk scores and detailed telemetry.
+                      </p>
+                    </div>
+                    <div className="mt-6 font-mono text-xs text-sentinel-orange tracking-wider uppercase font-semibold">
+                      Open Alerts →
+                    </div>
+                  </div>
                 </div>
-                <div className="h-4 w-px bg-border-default"></div>
-                <div className="font-mono text-xs text-text-muted tracking-wider">
-                  {time.toLocaleTimeString('en-US', { hour12: false })}
-                </div>
-                <div className="h-4 w-px bg-border-default"></div>
-                <button className="relative text-text-muted hover:text-text-primary p-1">
-                  <IconBell size={15} />
-                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-sentinel-red text-white text-[8px] font-mono rounded-full flex items-center justify-center">11</span>
-                </button>
-                <div className="w-6 h-6 rounded bg-bg-surface border border-border-default flex items-center justify-center text-text-muted">
-                  <IconUser size={13} />
+
+                {/* REAL-TIME THREAT GRAPH (PLACED DIRECTLY BELOW CARDS) */}
+                <div className="panel p-5 flex flex-col gap-4">
+                  <div className="flex justify-between items-center border-b border-border-subtle pb-3">
+                    <div>
+                      <div className="label-section">Real-Time Threat Telemetry & Activity Stream</div>
+                      <div className="font-mono text-xs text-text-muted">Live 24-hour threat detection frequency and attack vector metrics</div>
+                    </div>
+                    <div className="flex items-center gap-4 font-mono text-[10px]">
+                      <span className="text-green-400 flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-400"></span> Safe (814)</span>
+                      <span className="text-orange-400 flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-orange-400"></span> Suspicious (126)</span>
+                      <span className="text-red-400 flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-red-400"></span> High Risk (37)</span>
+                    </div>
+                  </div>
+
+                  {/* Graph SVG Visual */}
+                  <div className="h-52 w-full pt-2">
+                    <svg className="w-full h-full" viewBox="0 0 600 160" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="homeRedGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#ef4444" stopOpacity="0.4"/>
+                          <stop offset="100%" stopColor="#ef4444" stopOpacity="0"/>
+                        </linearGradient>
+                        <linearGradient id="homeOrangeGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#f97316" stopOpacity="0.25"/>
+                          <stop offset="100%" stopColor="#f97316" stopOpacity="0"/>
+                        </linearGradient>
+                      </defs>
+                      <line x1="0" y1="30" x2="600" y2="30" stroke="#1e2330" strokeDasharray="2 4" />
+                      <line x1="0" y1="75" x2="600" y2="75" stroke="#1e2330" strokeDasharray="2 4" />
+                      <line x1="0" y1="120" x2="600" y2="120" stroke="#1e2330" strokeDasharray="2 4" />
+                      
+                      {/* Area Fills */}
+                      <path d="M0,140 Q150,110 300,125 T450,85 T600,60 L600,160 L0,160 Z" fill="url(#homeRedGrad)" />
+                      <path d="M0,115 Q150,90 300,100 T450,70 T600,45 L600,160 L0,160 Z" fill="url(#homeOrangeGrad)" />
+
+                      {/* Smooth Trend Lines */}
+                      <path d="M0,90 Q150,70 300,60 T450,50 T600,30" fill="none" stroke="#22c55e" strokeWidth="2" />
+                      <path d="M0,115 Q150,90 300,100 T450,70 T600,45" fill="none" stroke="#f97316" strokeWidth="2" />
+                      <path d="M0,140 Q150,110 300,125 T450,85 T600,60" fill="none" stroke="#ef4444" strokeWidth="2.5" />
+
+                      {/* Active Alert Points */}
+                      <circle cx="300" cy="125" r="4" fill="#ef4444" className="blink" />
+                      <circle cx="450" cy="85" r="4" fill="#ef4444" className="blink" />
+                      <circle cx="600" cy="60" r="4" fill="#ef4444" className="blink" />
+                    </svg>
+                  </div>
                 </div>
               </div>
-            </header>
+            )}
 
-            {/* CONTENT ROUTER */}
-            <main className="flex-1 overflow-y-auto p-5 no-scrollbar">
-              {/* PAGE 0: CENTERED SENTINEL-X LANDING PAGE */}
-              {page === 'home' && (
-                <div className="flex flex-col items-center justify-center min-h-[calc(100vh-100px)] text-center max-w-4xl mx-auto py-8">
-                  {/* Glowing Shield Icon */}
-                  <div className="w-20 h-20 rounded-full bg-red-950/30 border border-sentinel-red/40 flex items-center justify-center text-sentinel-red mb-6 hero-glow">
-                    <IconShield size={44} />
-                  </div>
+            {/* PAGE 1: DASHBOARD */}
+            {page === 'dashboard' && (
+              <div className="flex flex-col gap-5 max-w-7xl mx-auto">
+                <div>
+                  <div className="label-section mb-1">Security Operations Center</div>
+                  <h1 className="font-mono text-lg font-semibold text-text-primary">Threat Visibility Dashboard</h1>
+                  <p className="font-mono text-xs text-text-muted">Threat visibility. Evidence-driven analysis.</p>
+                </div>
 
-                  {/* Centered Sentinel-X Title */}
-                  <h1 className="font-mono text-4xl md:text-5xl font-bold tracking-widest text-text-primary mb-3">
-                    SENTINEL<span className="text-sentinel-red">-X</span>
-                  </h1>
-
-                  <div className="label-mono text-xs tracking-widest text-sentinel-accent mb-4">
-                    ADVANCED CYBERSECURITY THREAT-ANALYSIS PLATFORM
-                  </div>
-
-                  <p className="font-mono text-xs md:text-sm text-text-secondary max-w-2xl leading-relaxed mb-8">
-                    Threat visibility. Evidence-driven analysis. Next-generation Security Operations Center (SOC) workstation designed to inspect digital artifacts, triage active threats, and analyze attack vectors.
-                  </p>
-
-                  {/* Quick Access Feature Cards */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full text-left mb-8">
-                    {/* Threat Analyzer Card */}
-                    <div 
-                      onClick={() => setPage('analyzer')}
-                      className="panel p-5 hover:border-sentinel-red/50 hover:bg-bg-hover transition-all duration-200 cursor-pointer group flex flex-col justify-between"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="p-2 rounded bg-red-950/40 text-sentinel-red border border-red-500/20">
-                            <IconAnalyzer size={18} />
-                          </span>
-                          <span className="text-text-muted group-hover:text-sentinel-red transition-colors">
-                            <IconArrowRight size={14} />
-                          </span>
-                        </div>
-                        <h3 className="font-mono text-sm font-semibold text-text-primary mb-1">Threat Analyzer</h3>
-                        <p className="font-mono text-[11px] text-text-muted leading-relaxed">
-                          Inspect suspicious URLs, messages, IP addresses, or file payloads with real-time evidence scoring.
-                        </p>
-                      </div>
-                      <div className="mt-4 font-mono text-[10px] text-sentinel-red tracking-wider uppercase font-semibold">
-                        Launch Analyzer →
-                      </div>
-                    </div>
-
-                    {/* SOC Overview Card */}
-                    <div 
-                      onClick={() => setPage('overview')}
-                      className="panel p-5 hover:border-sentinel-accent/50 hover:bg-bg-hover transition-all duration-200 cursor-pointer group flex flex-col justify-between"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="p-2 rounded bg-sky-950/40 text-sentinel-accent border border-sky-500/20">
-                            <IconOverview size={18} />
-                          </span>
-                          <span className="text-text-muted group-hover:text-sentinel-accent transition-colors">
-                            <IconArrowRight size={14} />
-                          </span>
-                        </div>
-                        <h3 className="font-mono text-sm font-semibold text-text-primary mb-1">SOC Overview</h3>
-                        <p className="font-mono text-[11px] text-text-muted leading-relaxed">
-                          24h detection activity telemetry, threat distribution breakdown, and live event monitoring stream.
-                        </p>
-                      </div>
-                      <div className="mt-4 font-mono text-[10px] text-sentinel-accent tracking-wider uppercase font-semibold">
-                        View Dashboard →
-                      </div>
-                    </div>
-
-                    {/* Alert Center Card */}
-                    <div 
-                      onClick={() => setPage('alerts')}
-                      className="panel p-5 hover:border-sentinel-orange/50 hover:bg-bg-hover transition-all duration-200 cursor-pointer group flex flex-col justify-between"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="p-2 rounded bg-orange-950/40 text-sentinel-orange border border-orange-500/20">
-                            <IconAlerts size={18} />
-                          </span>
-                          <span className="text-text-muted group-hover:text-sentinel-orange transition-colors">
-                            <IconArrowRight size={14} />
-                          </span>
-                        </div>
-                        <h3 className="font-mono text-sm font-semibold text-text-primary mb-1">Alert Center</h3>
-                        <p className="font-mono text-[11px] text-text-muted leading-relaxed">
-                          Triage, filter, and assign active security alerts with risk scores and detailed telemetry.
-                        </p>
-                      </div>
-                      <div className="mt-4 font-mono text-[10px] text-sentinel-orange tracking-wider uppercase font-semibold">
-                        Open Alerts →
-                      </div>
+                {/* 4 Compact Metrics */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="panel p-4 flex flex-col gap-2">
+                    <div className="flex justify-between items-center"><span className="label-mono">Threats Analyzed</span><IconShield size={14} className="text-sentinel-accent" /></div>
+                    <div className="flex justify-between items-end">
+                      <span className="font-mono text-2xl font-semibold text-text-primary">1,284</span>
+                      <span className="font-mono text-xs text-sentinel-green">+12.4%</span>
                     </div>
                   </div>
-
-                  {/* System Telemetry Bar */}
-                  <div className="panel-surface w-full p-4 flex flex-wrap justify-between items-center font-mono text-xs gap-4">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-sentinel-green pulse-dot"></span>
-                      <span className="text-text-muted">System Status:</span>
-                      <span className="text-sentinel-green font-semibold">OPERATIONAL</span>
+                  <div className="panel p-4 flex flex-col gap-2">
+                    <div className="flex justify-between items-center"><span className="label-mono">High Risk</span><IconShield size={14} className="text-sentinel-red" /></div>
+                    <div className="flex justify-between items-end">
+                      <span className="font-mono text-2xl font-semibold text-sentinel-red">37</span>
+                      <span className="font-mono text-xs text-sentinel-red">+3</span>
                     </div>
-                    <div className="flex items-center gap-6 text-text-muted text-[11px]">
-                      <span>THREATS ANALYZED: <strong className="text-text-primary">1,284</strong></span>
-                      <span>HIGH RISK: <strong className="text-sentinel-red">37</strong></span>
-                      <span>ACTIVE ALERTS: <strong className="text-sentinel-orange">11</strong></span>
+                  </div>
+                  <div className="panel p-4 flex flex-col gap-2">
+                    <div className="flex justify-between items-center"><span className="label-mono">Suspicious</span><IconShield size={14} className="text-sentinel-orange" /></div>
+                    <div className="flex justify-between items-end">
+                      <span className="font-mono text-2xl font-semibold text-sentinel-orange">126</span>
+                      <span className="font-mono text-xs text-sentinel-green">-8</span>
+                    </div>
+                  </div>
+                  <div className="panel p-4 flex flex-col gap-2">
+                    <div className="flex justify-between items-center"><span className="label-mono">Active Alerts</span><IconAlerts size={14} className="text-sentinel-red" /></div>
+                    <div className="flex justify-between items-end">
+                      <span className="font-mono text-2xl font-semibold text-sentinel-red">11</span>
+                      <span className="font-mono text-xs text-sentinel-red">+2</span>
                     </div>
                   </div>
                 </div>
-              )}
 
-              {/* PAGE 1: OVERVIEW */}
-              {page === 'overview' && (
-                <div className="flex flex-col gap-5">
-                  <div>
-                    <div className="label-section mb-1">Security Operations Center</div>
-                    <h1 className="font-mono text-lg font-semibold text-text-primary">Threat Visibility Dashboard</h1>
-                    <p className="font-mono text-xs text-text-muted">Threat visibility. Evidence-driven analysis.</p>
-                  </div>
-
-                  {/* 4 Compact Metrics */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="panel p-4 flex flex-col gap-2">
-                      <div className="flex justify-between items-center"><span className="label-mono">Threats Analyzed</span><IconShield size={14} className="text-sentinel-accent" /></div>
-                      <div className="flex justify-between items-end">
-                        <span className="font-mono text-2xl font-semibold text-text-primary">1,284</span>
-                        <span className="font-mono text-xs text-sentinel-green">+12.4%</span>
-                      </div>
+                {/* Threat Activity & Distribution Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  {/* Activity SVG Chart */}
+                  <div className="panel p-4 lg:col-span-2 flex flex-col">
+                    <div className="mb-3">
+                      <div className="label-section">Threat Activity</div>
+                      <div className="font-mono text-xs text-text-muted">Detection activity — last 24 hours</div>
                     </div>
-                    <div className="panel p-4 flex flex-col gap-2">
-                      <div className="flex justify-between items-center"><span className="label-mono">High Risk</span><IconShield size={14} className="text-sentinel-red" /></div>
-                      <div className="flex justify-between items-end">
-                        <span className="font-mono text-2xl font-semibold text-sentinel-red">37</span>
-                        <span className="font-mono text-xs text-sentinel-red">+3</span>
-                      </div>
+                    <div className="h-56 w-full pt-4">
+                      <svg className="w-full h-full" viewBox="0 0 500 180" preserveAspectRatio="none">
+                        <defs>
+                          <linearGradient id="redGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#ef4444" stopOpacity="0.3"/>
+                            <stop offset="100%" stopColor="#ef4444" stopOpacity="0"/>
+                          </linearGradient>
+                        </defs>
+                        <line x1="0" y1="30" x2="500" y2="30" stroke="#1e2330" strokeDasharray="2 4" />
+                        <line x1="0" y1="80" x2="500" y2="80" stroke="#1e2330" strokeDasharray="2 4" />
+                        <line x1="0" y1="130" x2="500" y2="130" stroke="#1e2330" strokeDasharray="2 4" />
+                        <path d="M0,130 Q100,100 200,80 T400,90 T500,70" fill="none" stroke="#22c55e" strokeWidth="1.5" />
+                        <path d="M0,150 Q100,140 200,120 T400,110 T500,95" fill="none" stroke="#f97316" strokeWidth="1.5" />
+                        <path d="M0,165 Q100,155 200,145 T350,115 T500,80 L500,180 L0,180 Z" fill="url(#redGrad)" />
+                        <path d="M0,165 Q100,155 200,145 T350,115 T500,80" fill="none" stroke="#ef4444" strokeWidth="2" />
+                      </svg>
                     </div>
-                    <div className="panel p-4 flex flex-col gap-2">
-                      <div className="flex justify-between items-center"><span className="label-mono">Suspicious</span><IconShield size={14} className="text-sentinel-orange" /></div>
-                      <div className="flex justify-between items-end">
-                        <span className="font-mono text-2xl font-semibold text-sentinel-orange">126</span>
-                        <span className="font-mono text-xs text-sentinel-green">-8</span>
-                      </div>
-                    </div>
-                    <div className="panel p-4 flex flex-col gap-2">
-                      <div className="flex justify-between items-center"><span className="label-mono">Active Alerts</span><IconAlerts size={14} className="text-sentinel-red" /></div>
-                      <div className="flex justify-between items-end">
-                        <span className="font-mono text-2xl font-semibold text-sentinel-red">11</span>
-                        <span className="font-mono text-xs text-sentinel-red">+2</span>
-                      </div>
+                    <div className="flex justify-end gap-6 pt-2 font-mono text-[10px]">
+                      <span className="text-green-400">● Safe</span>
+                      <span className="text-orange-400">● Suspicious</span>
+                      <span className="text-red-400">● High Risk</span>
                     </div>
                   </div>
 
-                  {/* Threat Activity & Distribution Grid */}
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    {/* Activity SVG Chart */}
-                    <div className="panel p-4 lg:col-span-2 flex flex-col">
-                      <div className="mb-3">
-                        <div className="label-section">Threat Activity</div>
-                        <div className="font-mono text-xs text-text-muted">Detection activity — last 24 hours</div>
-                      </div>
-                      <div className="h-56 w-full pt-4">
-                        <svg className="w-full h-full" viewBox="0 0 500 180" preserveAspectRatio="none">
-                          <defs>
-                            <linearGradient id="redGrad" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#ef4444" stopOpacity="0.3"/>
-                              <stop offset="100%" stopColor="#ef4444" stopOpacity="0"/>
-                            </linearGradient>
-                          </defs>
-                          <line x1="0" y1="30" x2="500" y2="30" stroke="#1e2330" strokeDasharray="2 4" />
-                          <line x1="0" y1="80" x2="500" y2="80" stroke="#1e2330" strokeDasharray="2 4" />
-                          <line x1="0" y1="130" x2="500" y2="130" stroke="#1e2330" strokeDasharray="2 4" />
-                          <path d="M0,130 Q100,100 200,80 T400,90 T500,70" fill="none" stroke="#22c55e" strokeWidth="1.5" />
-                          <path d="M0,150 Q100,140 200,120 T400,110 T500,95" fill="none" stroke="#f97316" strokeWidth="1.5" />
-                          <path d="M0,165 Q100,155 200,145 T350,115 T500,80 L500,180 L0,180 Z" fill="url(#redGrad)" />
-                          <path d="M0,165 Q100,155 200,145 T350,115 T500,80" fill="none" stroke="#ef4444" strokeWidth="2" />
-                        </svg>
-                      </div>
-                      <div className="flex justify-end gap-6 pt-2 font-mono text-[10px]">
-                        <span className="text-green-400">● Safe</span>
-                        <span className="text-orange-400">● Suspicious</span>
-                        <span className="text-red-400">● High Risk</span>
-                      </div>
+                  {/* Threat Distribution */}
+                  <div className="panel p-4 flex flex-col">
+                    <div className="mb-3">
+                      <div className="label-section">Threat Distribution</div>
+                      <div className="font-mono text-xs text-text-muted">Category breakdown</div>
                     </div>
-
-                    {/* Threat Distribution */}
-                    <div className="panel p-4 flex flex-col">
-                      <div className="mb-3">
-                        <div className="label-section">Threat Distribution</div>
-                        <div className="font-mono text-xs text-text-muted">Category breakdown</div>
-                      </div>
-                      <div className="flex-1 flex flex-col justify-center gap-3">
-                        {[
-                          { name: 'Phishing', count: 412, pct: 32.1, color: '#ef4444' },
-                          { name: 'Malicious URL', count: 298, pct: 23.2, color: '#f97316' },
-                          { name: 'Suspicious IP', count: 201, pct: 15.7, color: '#eab308' },
-                          { name: 'Credential Attack', count: 178, pct: 13.9, color: '#ef4444' },
-                          { name: 'Malware', count: 132, pct: 10.3, color: '#dc2626' },
-                        ].map(item => (
-                          <div key={item.name} className="flex flex-col gap-1">
-                            <div className="flex justify-between font-mono text-xs">
-                              <span className="text-text-secondary">{item.name}</span>
-                              <span className="text-text-muted">{item.count} ({item.pct}%)</span>
-                            </div>
-                            <div className="h-1.5 bg-bg-surface rounded-full overflow-hidden">
-                              <div className="h-full rounded-full" style={{ width: `${item.pct}%`, backgroundColor: item.color }}></div>
-                            </div>
+                    <div className="flex-1 flex flex-col justify-center gap-3">
+                      {[
+                        { name: 'Phishing', count: 412, pct: 32.1, color: '#ef4444' },
+                        { name: 'Malicious URL', count: 298, pct: 23.2, color: '#f97316' },
+                        { name: 'Suspicious IP', count: 201, pct: 15.7, color: '#eab308' },
+                        { name: 'Credential Attack', count: 178, pct: 13.9, color: '#ef4444' },
+                        { name: 'Malware', count: 132, pct: 10.3, color: '#dc2626' },
+                      ].map(item => (
+                        <div key={item.name} className="flex flex-col gap-1">
+                          <div className="flex justify-between font-mono text-xs">
+                            <span className="text-text-secondary">{item.name}</span>
+                            <span className="text-text-muted">{item.count} ({item.pct}%)</span>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Live Security Feed */}
-                  <div className="panel">
-                    <div className="p-4 border-b border-border-subtle flex justify-between items-center">
-                      <div>
-                        <div className="label-section">Live Security Feed</div>
-                        <div className="font-mono text-xs text-text-muted">Real-time event stream</div>
-                      </div>
-                      <span className="font-mono text-xs text-sentinel-green flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 bg-sentinel-green rounded-full blink"></span> STREAMING
-                      </span>
-                    </div>
-                    <div className="divide-y divide-border-subtle/50 font-mono text-xs">
-                      {threatEvents.map(ev => (
-                        <div key={ev.id} className="grid grid-cols-12 px-4 py-3 hover:bg-bg-hover items-center">
-                          <span className="col-span-2 text-text-muted text-[11px]">{ev.timestamp}</span>
-                          <span className="col-span-2"><StatusBadge status={ev.severity} /></span>
-                          <span className="col-span-5 text-text-secondary">{ev.event}</span>
-                          <span className="col-span-2 text-text-muted text-[11px] truncate">{ev.target}</span>
-                          <span className="col-span-1 text-right text-text-muted text-[10px]">{ev.status}</span>
+                          <div className="h-1.5 bg-bg-surface rounded-full overflow-hidden">
+                            <div className="h-full rounded-full" style={{ width: `${item.pct}%`, backgroundColor: item.color }}></div>
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
-              )}
 
-              {/* PAGE 2: THREAT ANALYZER */}
-              {page === 'analyzer' && (
-                <div className="flex flex-col gap-5">
-                  <div>
-                    <div className="label-section mb-1">Threat Analyzer</div>
-                    <h1 className="font-mono text-lg font-semibold text-text-primary">Inspect Suspicious Digital Artifacts</h1>
-                  </div>
-
-                  {/* Analysis Input Panel */}
-                  <div className="panel">
-                    <div className="flex border-b border-border-subtle font-mono text-xs">
-                      {['URL', 'MESSAGE', 'IP', 'FILE'].map(t => (
-                        <button
-                          key={t}
-                          onClick={() => setAnalyzerTab(t)}
-                          className={`px-5 py-3 border-b-2 uppercase tracking-wider ${
-                            analyzerTab === t ? 'border-sentinel-red text-text-primary bg-bg-surface font-medium' : 'border-transparent text-text-muted hover:text-text-secondary'
-                          }`}
-                        >
-                          {t}
-                        </button>
-                      ))}
+                {/* Live Security Feed */}
+                <div className="panel">
+                  <div className="p-4 border-b border-border-subtle flex justify-between items-center">
+                    <div>
+                      <div className="label-section">Live Security Feed</div>
+                      <div className="font-mono text-xs text-text-muted">Real-time event stream</div>
                     </div>
-                    <div className="p-4 flex flex-col gap-4">
-                      <textarea
-                        value={analyzerInput}
-                        onChange={e => setAnalyzerInput(e.target.value)}
-                        placeholder={
-                          analyzerTab === 'URL' ? 'Paste suspicious URL (e.g. https://example-login.com/auth)' :
-                          analyzerTab === 'MESSAGE' ? 'Paste suspicious email or message body...' :
-                          analyzerTab === 'IP' ? 'Enter IP address (e.g. 185.220.101.47)' :
-                          'Enter file hash or drag file...'
-                        }
-                        className="input-field h-24 resize-none"
-                      />
-                      <div className="flex justify-between items-center">
-                        <span className="font-mono text-[10px] text-text-muted">Target ready for deep inspection</span>
-                        <button
-                          onClick={runAnalysis}
-                          disabled={analyzerState === 'analyzing'}
-                          className="btn-primary flex items-center gap-2"
-                        >
-                          {analyzerState === 'analyzing' ? 'SCANNING ARTIFACT...' : 'RUN ANALYSIS'}
-                        </button>
+                    <span className="font-mono text-xs text-sentinel-green flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 bg-sentinel-green rounded-full blink"></span> STREAMING
+                    </span>
+                  </div>
+                  <div className="divide-y divide-border-subtle/50 font-mono text-xs">
+                    {threatEvents.map(ev => (
+                      <div key={ev.id} className="grid grid-cols-12 px-4 py-3 hover:bg-bg-hover items-center">
+                        <span className="col-span-2 text-text-muted text-[11px]">{ev.timestamp}</span>
+                        <span className="col-span-2"><StatusBadge status={ev.severity} /></span>
+                        <span className="col-span-5 text-text-secondary">{ev.event}</span>
+                        <span className="col-span-2 text-text-muted text-[11px] truncate">{ev.target}</span>
+                        <span className="col-span-1 text-right text-text-muted text-[10px]">{ev.status}</span>
                       </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* PAGE 2: THREAT ANALYZER */}
+            {page === 'analyzer' && (
+              <div className="flex flex-col gap-5 max-w-7xl mx-auto">
+                <div>
+                  <div className="label-section mb-1">Threat Analyzer</div>
+                  <h1 className="font-mono text-lg font-semibold text-text-primary">Inspect Suspicious Digital Artifacts</h1>
+                </div>
+
+                {/* Analysis Input Panel */}
+                <div className="panel">
+                  <div className="flex border-b border-border-subtle font-mono text-xs">
+                    {['URL', 'MESSAGE', 'IP', 'FILE'].map(t => (
+                      <button
+                        key={t}
+                        onClick={() => setAnalyzerTab(t)}
+                        className={`px-5 py-3 border-b-2 uppercase tracking-wider ${
+                          analyzerTab === t ? 'border-sentinel-red text-text-primary bg-bg-surface font-medium' : 'border-transparent text-text-muted hover:text-text-secondary'
+                        }`}
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="p-4 flex flex-col gap-4">
+                    <textarea
+                      value={analyzerInput}
+                      onChange={e => setAnalyzerInput(e.target.value)}
+                      placeholder={
+                        analyzerTab === 'URL' ? 'Paste suspicious URL (e.g. https://example-login.com/auth)' :
+                        analyzerTab === 'MESSAGE' ? 'Paste suspicious email or message body...' :
+                        analyzerTab === 'IP' ? 'Enter IP address (e.g. 185.220.101.47)' :
+                        'Enter file hash or drag file...'
+                      }
+                      className="input-field h-24 resize-none"
+                    />
+                    <div className="flex justify-between items-center">
+                      <span className="font-mono text-[10px] text-text-muted">Target ready for deep inspection</span>
+                      <button
+                        onClick={runAnalysis}
+                        disabled={analyzerState === 'analyzing'}
+                        className="btn-primary flex items-center gap-2"
+                      >
+                        {analyzerState === 'analyzing' ? 'SCANNING ARTIFACT...' : 'RUN ANALYSIS'}
+                      </button>
                     </div>
                   </div>
+                </div>
 
-                  {/* Analysis Results Display */}
-                  {(analyzerState === 'analyzing' || analyzerState === 'done') && (
-                    <div className="flex flex-col gap-5">
-                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                        {/* Radial Risk Score */}
-                        <div className="panel p-5 flex flex-col items-center justify-center text-center">
-                          <div className="relative w-36 h-36 flex items-center justify-center my-2">
-                            <svg className="w-full h-full rotate-[-90deg]">
-                              <circle cx="72" cy="72" r="54" fill="none" stroke="#1e2330" strokeWidth="8"/>
-                              <circle cx="72" cy="72" r="54" fill="none" stroke="#ef4444" strokeWidth="8" strokeDasharray="339" strokeDashoffset="44" strokeLinecap="round"/>
-                            </svg>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                              <span className="font-mono text-4xl font-bold text-sentinel-red">87</span>
-                              <span className="font-mono text-[10px] text-text-muted">/ 100</span>
-                            </div>
-                          </div>
-                          <span className="font-mono text-sm font-semibold text-sentinel-red tracking-wider mt-2">HIGH RISK</span>
-                          <span className="font-mono text-xs text-text-muted mt-1">Confidence: 94.2% · ID: SX-8F21A9</span>
-                          <span className="font-mono text-[11px] text-text-secondary bg-bg-surface px-3 py-1 border border-border-subtle rounded mt-3 truncate max-w-full">
-                            {analysisTarget}
-                          </span>
-                        </div>
-
-                        {/* Pipeline Timeline */}
-                        <div className="panel p-5 lg:col-span-2">
-                          <div className="label-section mb-4">Analysis Pipeline Timeline</div>
-                          <div className="flex flex-col gap-3 font-mono text-xs">
-                            {timelineSteps.map(st => (
-                              <div key={st.id} className="flex items-center gap-3">
-                                <span className="w-5 h-5 rounded-full bg-green-950/40 border border-green-500/40 text-green-400 text-[10px] flex items-center justify-center">✓</span>
-                                <span className="font-medium text-text-primary">{st.label}</span>
-                                <span className="text-text-muted text-[11px]">— {st.sublabel}</span>
-                              </div>
-                            ))}
+                {/* Analysis Results Display */}
+                {(analyzerState === 'analyzing' || analyzerState === 'done') && (
+                  <div className="flex flex-col gap-5">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                      {/* Radial Risk Score */}
+                      <div className="panel p-5 flex flex-col items-center justify-center text-center">
+                        <div className="relative w-36 h-36 flex items-center justify-center my-2">
+                          <svg className="w-full h-full rotate-[-90deg]">
+                            <circle cx="72" cy="72" r="54" fill="none" stroke="#1e2330" strokeWidth="8"/>
+                            <circle cx="72" cy="72" r="54" fill="none" stroke="#ef4444" strokeWidth="8" strokeDasharray="339" strokeDashoffset="44" strokeLinecap="round"/>
+                          </svg>
+                          <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <span className="font-mono text-4xl font-bold text-sentinel-red">87</span>
+                            <span className="font-mono text-[10px] text-text-muted">/ 100</span>
                           </div>
                         </div>
+                        <span className="font-mono text-sm font-semibold text-sentinel-red tracking-wider mt-2">HIGH RISK</span>
+                        <span className="font-mono text-xs text-text-muted mt-1">Confidence: 94.2% · ID: SX-8F21A9</span>
+                        <span className="font-mono text-[11px] text-text-secondary bg-bg-surface px-3 py-1 border border-border-subtle rounded mt-3 truncate max-w-full">
+                          {analysisTarget}
+                        </span>
                       </div>
 
-                      {/* Evidence Panel */}
-                      <div className="panel p-5">
-                        <div className="label-section mb-4">WHY WAS THIS FLAGGED? (Evidence Panel)</div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {defaultEvidence.map(item => (
-                            <div key={item.id} className="panel-surface p-4 flex flex-col gap-2">
-                              <div className="flex justify-between items-center">
-                                <span className="font-mono text-xs font-semibold text-text-primary">{item.id}. {item.type}</span>
-                                <span className="font-mono text-xs font-bold text-sentinel-red">+{item.contrib}</span>
-                              </div>
-                              <p className="font-mono text-xs text-text-secondary">{item.description}</p>
-                              <p className="font-mono text-[10px] text-text-muted">{item.detail}</p>
+                      {/* Pipeline Timeline */}
+                      <div className="panel p-5 lg:col-span-2">
+                        <div className="label-section mb-4">Analysis Pipeline Timeline</div>
+                        <div className="flex flex-col gap-3 font-mono text-xs">
+                          {timelineSteps.map(st => (
+                            <div key={st.id} className="flex items-center gap-3">
+                              <span className="w-5 h-5 rounded-full bg-green-950/40 border border-green-500/40 text-green-400 text-[10px] flex items-center justify-center">✓</span>
+                              <span className="font-medium text-text-primary">{st.label}</span>
+                              <span className="text-text-muted text-[11px]">— {st.sublabel}</span>
                             </div>
                           ))}
                         </div>
                       </div>
                     </div>
-                  )}
-                </div>
-              )}
 
-              {/* PAGE 3: ALERT CENTER */}
-              {page === 'alerts' && (
-                <div className="flex flex-col gap-5">
-                  <div className="flex justify-between items-end">
-                    <div>
-                      <div className="label-section mb-1">Alert Center</div>
-                      <h1 className="font-mono text-lg font-semibold text-text-primary">Active Security Alerts</h1>
-                    </div>
-                    <div className="flex gap-2 font-mono text-xs">
-                      {['ALL', 'HIGH', 'SUSPICIOUS', 'RESOLVED'].map(f => (
-                        <button
-                          key={f}
-                          onClick={() => setAlertFilter(f)}
-                          className={`px-3 py-1.5 rounded border ${alertFilter === f ? 'bg-bg-hover text-text-primary border-border-default' : 'text-text-muted border-transparent'}`}
-                        >
-                          {f}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="panel">
-                    <div className="p-3 border-b border-border-subtle">
-                      <input
-                        type="text"
-                        value={alertSearch}
-                        onChange={e => setAlertSearch(e.target.value)}
-                        placeholder="Search alerts by target or detection..."
-                        className="input-field text-xs h-8"
-                      />
-                    </div>
-                    <div className="divide-y divide-border-subtle font-mono text-xs">
-                      {alertsList
-                        .filter(a => alertFilter === 'ALL' || a.severity === alertFilter || a.status === alertFilter)
-                        .filter(a => !alertSearch || a.target.toLowerCase().includes(alertSearch.toLowerCase()) || a.detection.toLowerCase().includes(alertSearch.toLowerCase()))
-                        .map(a => (
-                          <div key={a.id} className="grid grid-cols-12 px-4 py-3 hover:bg-bg-hover items-center">
-                            <span className="col-span-2"><StatusBadge status={a.severity} /></span>
-                            <span className="col-span-2 text-sentinel-accent">{a.id}</span>
-                            <span className="col-span-4 text-text-secondary">{a.detection}</span>
-                            <span className="col-span-2 text-text-muted truncate">{a.target}</span>
-                            <span className="col-span-1 text-text-muted text-[10px]">{a.timeAgo}</span>
-                            <span className="col-span-1 text-right font-semibold text-sentinel-red">{a.riskScore}</span>
+                    {/* Evidence Panel */}
+                    <div className="panel p-5">
+                      <div className="label-section mb-4">WHY WAS THIS FLAGGED? (Evidence Panel)</div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {defaultEvidence.map(item => (
+                          <div key={item.id} className="panel-surface p-4 flex flex-col gap-2">
+                            <div className="flex justify-between items-center">
+                              <span className="font-mono text-xs font-semibold text-text-primary">{item.id}. {item.type}</span>
+                              <span className="font-mono text-xs font-bold text-sentinel-red">+{item.contrib}</span>
+                            </div>
+                            <p className="font-mono text-xs text-text-secondary">{item.description}</p>
+                            <p className="font-mono text-[10px] text-text-muted">{item.detail}</p>
                           </div>
                         ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+            )}
 
-              {/* PAGE 4: ACTIVITY */}
-              {page === 'activity' && (
-                <div className="flex flex-col gap-5">
+            {/* PAGE 3: ALERT CENTER */}
+            {page === 'alerts' && (
+              <div className="flex flex-col gap-5 max-w-7xl mx-auto">
+                <div className="flex justify-between items-end">
                   <div>
-                    <div className="label-section mb-1">Activity Log</div>
-                    <h1 className="font-mono text-lg font-semibold text-text-primary">Analyst Activity</h1>
+                    <div className="label-section mb-1">Alert Center</div>
+                    <h1 className="font-mono text-lg font-semibold text-text-primary">Active Security Alerts</h1>
                   </div>
+                  <div className="flex gap-2 font-mono text-xs">
+                    {['ALL', 'HIGH', 'SUSPICIOUS', 'RESOLVED'].map(f => (
+                      <button
+                        key={f}
+                        onClick={() => setAlertFilter(f)}
+                        className={`px-3 py-1.5 rounded border ${alertFilter === f ? 'bg-bg-hover text-text-primary border-border-default' : 'text-text-muted border-transparent'}`}
+                      >
+                        {f}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-                  <div className="panel">
-                    <div className="divide-y divide-border-subtle font-mono text-xs">
-                      {activityRecords.map(r => (
-                        <div key={r.id} className="grid grid-cols-12 px-4 py-3 hover:bg-bg-hover items-center">
-                          <span className="col-span-2 text-text-muted">{r.timestamp}</span>
-                          <span className="col-span-2 text-sentinel-accent">{r.id}</span>
-                          <span className="col-span-2 text-text-secondary">{r.analyst}</span>
-                          <span className="col-span-3 text-text-secondary truncate">{r.target}</span>
-                          <span className="col-span-2"><StatusBadge status={r.severity} /></span>
-                          <span className="col-span-1 text-right text-text-muted text-[10px]">{r.action}</span>
+                <div className="panel">
+                  <div className="p-3 border-b border-border-subtle">
+                    <input
+                      type="text"
+                      value={alertSearch}
+                      onChange={e => setAlertSearch(e.target.value)}
+                      placeholder="Search alerts by target or detection..."
+                      className="input-field text-xs h-8"
+                    />
+                  </div>
+                  <div className="divide-y divide-border-subtle font-mono text-xs">
+                    {alertsList
+                      .filter(a => alertFilter === 'ALL' || a.severity === alertFilter || a.status === alertFilter)
+                      .filter(a => !alertSearch || a.target.toLowerCase().includes(alertSearch.toLowerCase()) || a.detection.toLowerCase().includes(alertSearch.toLowerCase()))
+                      .map(a => (
+                        <div key={a.id} className="grid grid-cols-12 px-4 py-3 hover:bg-bg-hover items-center">
+                          <span className="col-span-2"><StatusBadge status={a.severity} /></span>
+                          <span className="col-span-2 text-sentinel-accent">{a.id}</span>
+                          <span className="col-span-4 text-text-secondary">{a.detection}</span>
+                          <span className="col-span-2 text-text-muted truncate">{a.target}</span>
+                          <span className="col-span-1 text-text-muted text-[10px]">{a.timeAgo}</span>
+                          <span className="col-span-1 text-right font-semibold text-sentinel-red">{a.riskScore}</span>
                         </div>
                       ))}
-                    </div>
                   </div>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* PAGE 5: INVESTIGATION */}
-              {page === 'investigation' && (
-                <div className="flex flex-col gap-5 h-full">
+            {/* PAGE 4: ACTIVITY */}
+            {page === 'activity' && (
+              <div className="flex flex-col gap-5 max-w-7xl mx-auto">
+                <div>
+                  <div className="label-section mb-1">Activity Log</div>
+                  <h1 className="font-mono text-lg font-semibold text-text-primary">Analyst Activity</h1>
+                </div>
+
+                <div className="panel">
+                  <div className="divide-y divide-border-subtle font-mono text-xs">
+                    {activityRecords.map(r => (
+                      <div key={r.id} className="grid grid-cols-12 px-4 py-3 hover:bg-bg-hover items-center">
+                        <span className="col-span-2 text-text-muted">{r.timestamp}</span>
+                        <span className="col-span-2 text-sentinel-accent">{r.id}</span>
+                        <span className="col-span-2 text-text-secondary">{r.analyst}</span>
+                        <span className="col-span-3 text-text-secondary truncate">{r.target}</span>
+                        <span className="col-span-2"><StatusBadge status={r.severity} /></span>
+                        <span className="col-span-1 text-right text-text-muted text-[10px]">{r.action}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* PAGE 5: INVESTIGATION */}
+            {page === 'investigation' && (
+              <div className="flex flex-col gap-5 h-full max-w-7xl mx-auto">
+                <div>
+                  <div className="label-section mb-1">Investigation</div>
+                  <h1 className="font-mono text-lg font-semibold text-text-primary">Threat Relationship Graph</h1>
+                </div>
+
+                <div className="panel p-6 flex-1 flex flex-col items-center justify-center min-h-[420px] relative overflow-hidden bg-bg-base">
+                  <svg className="w-full h-96" viewBox="0 0 600 320">
+                    <line x1="300" y1="50" x2="150" y2="140" stroke="#252b3a" strokeWidth="2" />
+                    <line x1="300" y1="50" x2="300" y2="140" stroke="#252b3a" strokeWidth="2" />
+                    <line x1="300" y1="50" x2="450" y2="140" stroke="#252b3a" strokeWidth="2" />
+                    <line x1="150" y1="140" x2="300" y2="240" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="4" />
+                    <line x1="300" y1="140" x2="300" y2="240" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="4" />
+                    <line x1="450" y1="140" x2="300" y2="240" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="4" />
+
+                    <g transform="translate(240, 30)">
+                      <rect width="120" height="40" rx="3" fill="#141720" stroke="#ef4444" strokeWidth="1.5"/>
+                      <text x="60" y="18" fill="#ef4444" fontSize="10" fontFamily="JetBrains Mono" textAnchor="middle" fontWeight="bold">TARGET</text>
+                      <text x="60" y="30" fill="#e2e8f0" fontSize="9" fontFamily="JetBrains Mono" textAnchor="middle">example-login.com</text>
+                    </g>
+
+                    <g transform="translate(90, 120)">
+                      <rect width="120" height="40" rx="3" fill="#141720" stroke="#ef4444" strokeWidth="1.5"/>
+                      <text x="60" y="18" fill="#ef4444" fontSize="10" fontFamily="JetBrains Mono" textAnchor="middle" fontWeight="bold">DOMAIN</text>
+                      <text x="60" y="30" fill="#94a3b8" fontSize="9" fontFamily="JetBrains Mono" textAnchor="middle">Age: 2d</text>
+                    </g>
+
+                    <g transform="translate(240, 120)">
+                      <rect width="120" height="40" rx="3" fill="#141720" stroke="#f97316" strokeWidth="1.5"/>
+                      <text x="60" y="18" fill="#f97316" fontSize="10" fontFamily="JetBrains Mono" textAnchor="middle" fontWeight="bold">URL ENTROPY</text>
+                      <text x="60" y="30" fill="#94a3b8" fontSize="9" fontFamily="JetBrains Mono" textAnchor="middle">4.8 bits</text>
+                    </g>
+
+                    <g transform="translate(390, 120)">
+                      <rect width="120" height="40" rx="3" fill="#141720" stroke="#ef4444" strokeWidth="1.5"/>
+                      <text x="60" y="18" fill="#ef4444" fontSize="10" fontFamily="JetBrains Mono" textAnchor="middle" fontWeight="bold">IP ADDRESS</text>
+                      <text x="60" y="30" fill="#94a3b8" fontSize="9" fontFamily="JetBrains Mono" textAnchor="middle">185.220.101.47</text>
+                    </g>
+
+                    <g transform="translate(240, 220)">
+                      <rect width="120" height="45" rx="3" fill="#0f1117" stroke="#ef4444" strokeWidth="2"/>
+                      <text x="60" y="18" fill="#ef4444" fontSize="11" fontFamily="JetBrains Mono" textAnchor="middle" fontWeight="bold">RISK SCORE</text>
+                      <text x="60" y="34" fill="#ef4444" fontSize="13" fontFamily="JetBrains Mono" textAnchor="middle" fontWeight="bold">87 / 100</text>
+                    </g>
+                  </svg>
+                </div>
+              </div>
+            )}
+
+            {/* PAGE 6: REPORTS */}
+            {page === 'reports' && (
+              <div className="flex flex-col gap-5 max-w-7xl mx-auto">
+                <div className="flex justify-between items-center">
                   <div>
-                    <div className="label-section mb-1">Investigation</div>
-                    <h1 className="font-mono text-lg font-semibold text-text-primary">Threat Relationship Graph</h1>
+                    <div className="label-section mb-1">Reports</div>
+                    <h1 className="font-mono text-lg font-semibold text-text-primary">Threat Analysis Report</h1>
+                  </div>
+                  <button onClick={exportReport} className="btn-primary">
+                    EXPORT REPORT (.TXT)
+                  </button>
+                </div>
+
+                <div className="panel p-6 font-mono text-xs flex flex-col gap-4">
+                  <div className="border-b border-border-subtle pb-4">
+                    <div className="text-text-muted mb-1">SUMMARY</div>
+                    <div className="text-base text-text-primary font-semibold">TARGET: {analysisTarget}</div>
+                    <div className="text-sentinel-red text-sm font-bold mt-1">RISK SCORE: 87/100 (HIGH RISK)</div>
                   </div>
 
-                  <div className="panel p-6 flex-1 flex flex-col items-center justify-center min-h-[420px] relative overflow-hidden bg-bg-base">
-                    {/* SVG Threat Node Graph */}
-                    <svg className="w-full h-96" viewBox="0 0 600 320">
-                      <line x1="300" y1="50" x2="150" y2="140" stroke="#252b3a" strokeWidth="2" />
-                      <line x1="300" y1="50" x2="300" y2="140" stroke="#252b3a" strokeWidth="2" />
-                      <line x1="300" y1="50" x2="450" y2="140" stroke="#252b3a" strokeWidth="2" />
-                      <line x1="150" y1="140" x2="300" y2="240" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="4" />
-                      <line x1="300" y1="140" x2="300" y2="240" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="4" />
-                      <line x1="450" y1="140" x2="300" y2="240" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="4" />
-
-                      <g transform="translate(240, 30)">
-                        <rect width="120" height="40" rx="3" fill="#141720" stroke="#ef4444" strokeWidth="1.5"/>
-                        <text x="60" y="18" fill="#ef4444" fontSize="10" fontFamily="JetBrains Mono" textAnchor="middle" fontWeight="bold">TARGET</text>
-                        <text x="60" y="30" fill="#e2e8f0" fontSize="9" fontFamily="JetBrains Mono" textAnchor="middle">example-login.com</text>
-                      </g>
-
-                      <g transform="translate(90, 120)">
-                        <rect width="120" height="40" rx="3" fill="#141720" stroke="#ef4444" strokeWidth="1.5"/>
-                        <text x="60" y="18" fill="#ef4444" fontSize="10" fontFamily="JetBrains Mono" textAnchor="middle" fontWeight="bold">DOMAIN</text>
-                        <text x="60" y="30" fill="#94a3b8" fontSize="9" fontFamily="JetBrains Mono" textAnchor="middle">Age: 2d</text>
-                      </g>
-
-                      <g transform="translate(240, 120)">
-                        <rect width="120" height="40" rx="3" fill="#141720" stroke="#f97316" strokeWidth="1.5"/>
-                        <text x="60" y="18" fill="#f97316" fontSize="10" fontFamily="JetBrains Mono" textAnchor="middle" fontWeight="bold">URL ENTROPY</text>
-                        <text x="60" y="30" fill="#94a3b8" fontSize="9" fontFamily="JetBrains Mono" textAnchor="middle">4.8 bits</text>
-                      </g>
-
-                      <g transform="translate(390, 120)">
-                        <rect width="120" height="40" rx="3" fill="#141720" stroke="#ef4444" strokeWidth="1.5"/>
-                        <text x="60" y="18" fill="#ef4444" fontSize="10" fontFamily="JetBrains Mono" textAnchor="middle" fontWeight="bold">IP ADDRESS</text>
-                        <text x="60" y="30" fill="#94a3b8" fontSize="9" fontFamily="JetBrains Mono" textAnchor="middle">185.220.101.47</text>
-                      </g>
-
-                      <g transform="translate(240, 220)">
-                        <rect width="120" height="45" rx="3" fill="#0f1117" stroke="#ef4444" strokeWidth="2"/>
-                        <text x="60" y="18" fill="#ef4444" fontSize="11" fontFamily="JetBrains Mono" textAnchor="middle" fontWeight="bold">RISK SCORE</text>
-                        <text x="60" y="34" fill="#ef4444" fontSize="13" fontFamily="JetBrains Mono" textAnchor="middle" fontWeight="bold">87 / 100</text>
-                      </g>
-                    </svg>
+                  <div>
+                    <div className="label-section mb-2">RECOMMENDED ACTIONS</div>
+                    <ol className="list-decimal list-inside text-text-secondary space-y-1">
+                      <li>Block all perimeter traffic to domain.</li>
+                      <li>Inspect internal hosts with active connections.</li>
+                      <li>Reset user credentials for affected accounts.</li>
+                      <li>Submit domain for registrar takedown.</li>
+                    </ol>
                   </div>
                 </div>
-              )}
+              </div>
+            )}
+          </main>
 
-              {/* PAGE 6: REPORTS */}
-              {page === 'reports' && (
-                <div className="flex flex-col gap-5">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className="label-section mb-1">Reports</div>
-                      <h1 className="font-mono text-lg font-semibold text-text-primary">Threat Analysis Report</h1>
-                    </div>
-                    <button onClick={exportReport} className="btn-primary">
-                      EXPORT REPORT (.TXT)
-                    </button>
-                  </div>
+          {/* BOTTOMMOST TELEMETRY FOOTER BAR */}
+          <footer className="h-10 bg-bg-panel border-t border-border-subtle px-6 flex items-center justify-between shrink-0 font-mono text-xs text-text-muted z-20">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-sentinel-green pulse-dot"></span>
+              <span>System Status:</span>
+              <span className="text-sentinel-green font-semibold">OPERATIONAL</span>
+            </div>
 
-                  <div className="panel p-6 font-mono text-xs flex flex-col gap-4">
-                    <div className="border-b border-border-subtle pb-4">
-                      <div className="text-text-muted mb-1">SUMMARY</div>
-                      <div className="text-base text-text-primary font-semibold">TARGET: {analysisTarget}</div>
-                      <div className="text-sentinel-red text-sm font-bold mt-1">RISK SCORE: 87/100 (HIGH RISK)</div>
-                    </div>
-
-                    <div>
-                      <div className="label-section mb-2">RECOMMENDED ACTIONS</div>
-                      <ol className="list-decimal list-inside text-text-secondary space-y-1">
-                        <li>Block all perimeter traffic to domain.</li>
-                        <li>Inspect internal hosts with active connections.</li>
-                        <li>Reset user credentials for affected accounts.</li>
-                        <li>Submit domain for registrar takedown.</li>
-                      </ol>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </main>
-          </div>
+            <div className="flex items-center gap-6 text-xs">
+              <span>THREATS ANALYZED: <strong className="text-text-primary">1,284</strong></span>
+              <span>HIGH RISK: <strong className="text-sentinel-red">37</strong></span>
+              <span>ACTIVE ALERTS: <strong className="text-sentinel-orange">11</strong></span>
+            </div>
+          </footer>
         </div>
       );
     }
