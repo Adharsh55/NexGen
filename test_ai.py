@@ -1,6 +1,5 @@
 import unittest
 import json
-from ai_engine import clean_and_parse_json, FALLBACK_RESPONSE
 from google.genai import types
 from ai_engine import clean_and_parse_json, prepare_image_part, FALLBACK_RESPONSE
 
