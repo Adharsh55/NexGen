@@ -1,7 +1,25 @@
+# Python bytecode / cache
+__pycache__/
+_pycache_/
+*pycache*
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Environment files
+.env
+.venv
+env/
+venv/
+
+# Node / Web Frontend
 node_modules
 dist
 dist-ssr
 *.local
 .DS_Store
+
+# IDE / Editor files
 .vscode
 .idea
