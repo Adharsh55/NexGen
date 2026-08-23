@@ -12,6 +12,11 @@ _pycache_/
 .venv
 env/
 venv/
+ENV/
+
+# IDE / Editor files
+.vscode/
+.idea/
 
 # Node / Web Frontend
 node_modules
