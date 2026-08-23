@@ -1,7 +1,19 @@
-node_modules
-dist
-dist-ssr
-*.local
-.DS_Store
-.vscode
-.idea
+# Python bytecode / cache
+__pycache__/
+_pycache_/
+*pycache*
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Environment files
+.env
+.venv
+env/
+venv/
+ENV/
+
+# IDE / Editor files
+.vscode/
+.idea/
