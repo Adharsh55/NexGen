@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SENTINEL-X | Threat Analysis Platform</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#09090b',
+            'bg-panel': '#0f1117',
+            'bg-surface': '#141720',
+            'bg-hover': '#1a1f2e',
+            'border-subtle': '#1e2330',
+            'border-default': '#252b3a',
+            'text-primary': '#e2e8f0',
+            'text-secondary': '#94a3b8',
+            'text-muted': '#475569',
+            'sentinel-green': '#22c55e',
+            'sentinel-orange': '#f97316',
+            'sentinel-red': '#ef4444',
+            'sentinel-accent': '#38bdf8',
+            'sentinel-yellow': '#eab308',
+          },
+          fontFamily: {
+            mono: ['JetBrains Mono', 'monospace'],
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom styles -->
+  <style>
+    body {
+      background-color: #09090b;
+      color: #e2e8f0;
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+      margin: 0;
+      height: 100vh;
+    }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: #0f1117; }
+    ::-webkit-scrollbar-thumb { background: #252b3a; border-radius: 2px; }
+    ::-webkit-scrollbar-thumb:hover { background: #2e3650; }
+    .panel { background-color: #0f1117; border: 1px solid #1e2330; border-radius: 2px; }
+    .panel-surface { background-color: #141720; border: 1px solid #1e2330; border-radius: 2px; }
+    .label-mono { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #475569; }
+    .label-section { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; font-weight: 500; }
+    .btn-primary { background-color: rgba(239, 68, 68, 0.9); color: #ffffff; font-family: 'JetBrains Mono', monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; padding: 10px 24px; border-radius: 2px; border: 1px solid rgba(239, 68, 68, 0.5); transition: all 0.15s; cursor: pointer; }
+    .btn-primary:hover { background-color: #ef4444; border-color: #ef4444; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+    .input-field { background-color: #141720; border: 1px solid #252b3a; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 13px; border-radius: 2px; padding: 8px 12px; outline: none; width: 100%; }
+    .input-field:focus { border-color: rgba(56, 189, 248, 0.5); }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .blink { animation: blink 1.5s ease-in-out infinite; }
+    @keyframes pulseDot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
+    .pulse-dot { animation: pulseDot 2s ease-in-out infinite; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+  </style>
+
+  <!-- React & Babel Standalone -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // --- ICONS ---
+    const IconShield = ({ size=16, className="" }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M12 2L4 6v6c0 5.1 3.4 9.9 8 11 4.6-1.1 8-5.9 8-11V6L12 2z"/>
+      </svg>
+    );
+    const IconOverview = ({ size=16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    );
+    const IconAnalyzer = ({ size=16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/><path d="m16 16 3 3"/></svg>
+    );
+    const IconAlerts = ({ size=16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    );
+    const IconActivity = ({ size=16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    );
+    const IconInvestigation = ({ size=16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+    );
+    const IconReports = ({ size=16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    );
+    const IconBell = ({ size=16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+    );
+    const IconUser = ({ size=16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    );
+
+    // --- MOCK DATA ---
+    const threatEvents = [
+      { id: 'te-001', timestamp: '10:42:31', severity: 'HIGH', event: 'Credential harvesting pattern detected', target: 'login-secure-verify.com', status: 'ACTIVE', category: 'Credential Attack' },
+      { id: 'te-002', timestamp: '10:41:18', severity: 'SUSPICIOUS', event: 'Unusual redirect chain identified', target: '203.0.113.47', status: 'ACTIVE', category: 'Suspicious IP' },
+      { id: 'te-003', timestamp: '10:39:44', severity: 'SAFE', event: 'Domain reputation check completed', target: 'github.com', status: 'PROCESSED', category: 'Other' },
+      { id: 'te-004', timestamp: '10:37:22', severity: 'HIGH', event: 'Malicious payload signature detected', target: 'payload-cdn.ru', status: 'ACTIVE', category: 'Malware' },
+      { id: 'te-005', timestamp: '10:35:10', severity: 'SUSPICIOUS', event: 'Encoded parameter obfuscation in URL', target: 'bank-update-form.net', status: 'ACTIVE', category: 'Phishing' },
+      { id: 'te-006', timestamp: '10:33:58', severity: 'HIGH', event: 'Known phishing domain fingerprint matched', target: 'secure-paypa1-login.com', status: 'PROCESSED', category: 'Phishing' },
+      { id: 'te-007', timestamp: '10:31:02', severity: 'SAFE', event: 'Certificate validation passed', target: 'cloudflare.com', status: 'PROCESSED', category: 'Other' },
+    ];
+
+    const alertsList = [
+      { id: 'ALT-4821', severity: 'HIGH', target: 'login-example.com', detection: 'Credential harvesting pattern', timeAgo: '2 min ago', timestamp: '10:40:22', status: 'OPEN', riskScore: 87, analyst: 'Unassigned' },
+      { id: 'ALT-4820', severity: 'SUSPICIOUS', target: '192.168.1.23', detection: 'Unusual outbound traffic volume', timeAgo: '8 min ago', timestamp: '10:34:11', status: 'INVESTIGATING', riskScore: 62, analyst: 'J. Martinez' },
+      { id: 'ALT-4819', severity: 'HIGH', target: 'payload-example.ru', detection: 'Malware signature match — Trojan.Agent', timeAgo: '12 min ago', timestamp: '10:30:05', status: 'OPEN', riskScore: 94, analyst: 'Unassigned' },
+      { id: 'ALT-4818', severity: 'SUSPICIOUS', target: '203.0.113.88', detection: 'Port scan from flagged IP range', timeAgo: '18 min ago', timestamp: '10:24:33', status: 'INVESTIGATING', riskScore: 58, analyst: 'A. Chen' },
+      { id: 'ALT-4817', severity: 'HIGH', target: 'update-service.xyz', detection: 'Fake software update distribution', timeAgo: '25 min ago', timestamp: '10:17:04', status: 'OPEN', riskScore: 91, analyst: 'Unassigned' },
+      { id: 'ALT-4816', severity: 'SUSPICIOUS', target: 'cdn-assets.ru', detection: 'JavaScript obfuscation detected', timeAgo: '31 min ago', timestamp: '10:11:22', status: 'INVESTIGATING', riskScore: 67, analyst: 'R. Okafor' },
+      { id: 'ALT-4815', severity: 'HIGH', target: 'verify-account-now.net', detection: 'Domain typosquatting — financial institution', timeAgo: '44 min ago', timestamp: '09:58:14', status: 'RESOLVED', riskScore: 89, analyst: 'J. Martinez' },
+    ];
+
+    const activityRecords = [
+      { id: 'ACT-1091', timestamp: '10:42:31', analyst: 'System', target: 'login-secure-verify.com', type: 'URL Analysis', risk: 87, severity: 'HIGH', action: 'Alert Created' },
+      { id: 'ACT-1090', timestamp: '10:40:12', analyst: 'J. Martinez', target: 'ALT-4820', type: 'Alert Review', risk: 62, severity: 'SUSPICIOUS', action: 'Status Updated' },
+      { id: 'ACT-1089', timestamp: '10:38:55', analyst: 'System', target: 'payload-example.ru', type: 'URL Analysis', risk: 94, severity: 'HIGH', action: 'Alert Created' },
+      { id: 'ACT-1088', timestamp: '10:35:20', analyst: 'A. Chen', target: '203.0.113.88', type: 'IP Analysis', risk: 58, severity: 'SUSPICIOUS', action: 'Investigating' },
+      { id: 'ACT-1087', timestamp: '10:31:44', analyst: 'System', target: 'github.com', type: 'URL Analysis', risk: 4, severity: 'SAFE', action: 'Logged' },
+      { id: 'ACT-1086', timestamp: '10:28:11', analyst: 'R. Okafor', target: 'ALT-4815', type: 'Alert Review', risk: 89, severity: 'HIGH', action: 'Resolved' },
+    ];
+
+    const defaultEvidence = [
+      { id: 1, type: 'SUSPICIOUS URL STRUCTURE', description: 'Unusual encoded parameters detected in URL path.', detail: 'URL contains base64-encoded redirect chains and obfuscated query parameters.', severity: 'SUSPICIOUS', contrib: 18 },
+      { id: 2, type: 'CREDENTIAL HARVESTING', description: 'Login-related phishing indicators present.', detail: 'Page contains password input fields pointing to external endpoint.', severity: 'HIGH', contrib: 24 },
+      { id: 3, type: 'REDIRECT ANOMALY', description: 'Multiple external redirects detected.', detail: '3-hop redirect chain through 2 flagged domains.', severity: 'SUSPICIOUS', contrib: 15 },
+      { id: 4, type: 'DOMAIN ANOMALY', description: 'Recently registered domain pattern.', detail: 'Domain registered 2 days ago with brand typosquatting.', severity: 'HIGH', contrib: 21 },
+    ];
+
+    const timelineSteps = [
+      { id: 1, label: 'TARGET RECEIVED', sublabel: 'Input normalized & sanitized' },
+      { id: 2, label: 'INPUT NORMALIZED', sublabel: 'URL decoded, scheme extracted' },
+      { id: 3, label: 'FEATURES EXTRACTED', sublabel: '47 structural features identified' },
+      { id: 4, label: 'SECURITY INDICATORS CHECKED', sublabel: 'Reputation databases queried' },
+      { id: 5, label: 'EVIDENCE CORRELATED', sublabel: '4 indicators matched' },
+      { id: 6, label: 'RISK CALCULATED', sublabel: 'Score: 87/100' },
+      { id: 7, label: 'CLASSIFICATION GENERATED', sublabel: 'HIGH RISK — 94.2% confidence' },
+    ];
+
+    // --- REUSABLE COMPONENTS ---
+    function StatusBadge({ status }) {
+      let cls = "bg-slate-800 text-slate-400 border-slate-700";
+      if (status === 'HIGH' || status === 'OPEN') cls = "bg-red-950/40 text-red-400 border-red-500/30";
+      else if (status === 'SUSPICIOUS' || status === 'ACTIVE') cls = "bg-orange-950/40 text-orange-400 border-orange-500/30";
+      else if (status === 'SAFE') cls = "bg-green-950/40 text-green-400 border-green-500/30";
+      else if (status === 'INVESTIGATING') cls = "bg-sky-950/40 text-sky-400 border-sky-500/30";
+      return (
+        <span className={`inline-flex items-center font-mono text-[10px] px-1.5 py-0.5 border rounded-sm tracking-widest uppercase ${cls}`}>
+          {status}
+        </span>
+      );
+    }
+
+    // --- APP COMPONENT ---
+    function App() {
+      const [page, setPage] = useState('overview');
+      const [time, setTime] = useState(new Date());
+      const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+      // Analyzer State
+      const [analyzerTab, setAnalyzerTab] = useState('URL');
+      const [analyzerInput, setAnalyzerInput] = useState('');
+      const [analyzerState, setAnalyzerState] = useState('idle'); // idle, analyzing, done
+      const [analysisTarget, setAnalysisTarget] = useState('example-login.com');
+
+      // Alerts Filter & Search
+      const [alertFilter, setAlertFilter] = useState('ALL');
+      const [alertSearch, setAlertSearch] = useState('');
+
+      // Activity Search
+      const [actSearch, setActSearch] = useState('');
+
+      useEffect(() => {
+        const timer = setInterval(() => setTime(new Date()), 1000);
+        return () => clearInterval(timer);
+      }, []);
+
+      const runAnalysis = () => {
+        const t = analyzerInput.trim() || 'example-login.com';
+        setAnalysisTarget(t);
+        setAnalyzerState('analyzing');
+        setTimeout(() => {
+          setAnalyzerState('done');
+        }, 2500);
+      };
+
+      const exportReport = () => {
+        const text = `================================================================
+SENTINEL-X THREAT ANALYSIS REPORT
+================================================================
+Target: ${analysisTarget}
+Risk Score: 87/100 (HIGH RISK)
+Confidence: 94.2%
+Analysis ID: SX-8F21A9
+Timestamp: ${new Date().toISOString()}
+
+EVIDENCE INDICATORS:
+01. SUSPICIOUS URL STRUCTURE (+18)
+02. CREDENTIAL HARVESTING (+24)
+03. REDIRECT ANOMALY (+15)
+04. DOMAIN ANOMALY (+21)
+
+RECOMMENDED ACTIONS:
+1. Block all perimeter traffic to domain.
+2. Inspect hosts with active connections.
+3. Reset user credentials.
+4. Report domain for registrar takedown.
+================================================================`;
+        const blob = new Blob([text], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `SENTINELX-Report-${analysisTarget.replace(/[^a-z0-9]/gi, '_')}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      };
+
+      return (
+        <div className="flex h-screen w-screen overflow-hidden bg-bg-base">
+          {/* SIDEBAR */}
+          <aside className={`flex flex-col h-full bg-bg-panel border-r border-border-subtle shrink-0 transition-all duration-200 ${sidebarCollapsed ? 'w-14' : 'w-52'}`}>
+            {/* Logo */}
+            <div className="flex items-center gap-2.5 px-3.5 h-12 border-b border-border-subtle shrink-0">
+              <div className="text-sentinel-red">
+                <IconShield size={20} />
+              </div>
+              {!sidebarCollapsed && (
+                <span className="font-mono text-sm font-semibold tracking-widest text-text-primary">
+                  SENTINEL<span className="text-sentinel-red">-X</span>
+                </span>
+              )}
+            </div>
+
+            {/* Nav */}
+            <nav className="flex-1 py-3 px-2 flex flex-col gap-1 overflow-y-auto no-scrollbar">
+              {!sidebarCollapsed && <div className="label-mono px-2 py-1 mb-1">Navigation</div>}
+              {[
+                { id: 'overview', label: 'Overview', icon: <IconOverview /> },
+                { id: 'analyzer', label: 'Threat Analyzer', icon: <IconAnalyzer /> },
+                { id: 'alerts', label: 'Alert Center', icon: <IconAlerts /> },
+                { id: 'activity', label: 'Activity', icon: <IconActivity /> },
+                { id: 'investigation', label: 'Investigation', icon: <IconInvestigation /> },
+                { id: 'reports', label: 'Reports', icon: <IconReports /> },
+              ].map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => setPage(item.id)}
+                  className={`flex items-center gap-3 px-2.5 py-2 rounded-sm font-mono text-xs tracking-wider uppercase transition-all ${
+                    page === item.id 
+                      ? 'text-text-primary bg-bg-hover border-l-2 border-sentinel-red font-medium' 
+                      : 'text-text-muted hover:text-text-primary hover:bg-bg-hover'
+                  } ${sidebarCollapsed ? 'justify-center' : ''}`}
+                >
+                  <span className="shrink-0">{item.icon}</span>
+                  {!sidebarCollapsed && <span>{item.label}</span>}
+                </button>
+              ))}
+            </nav>
+
+            {/* Bottom Status */}
+            <div className="border-t border-border-subtle px-3.5 py-3 shrink-0">
+              {!sidebarCollapsed ? (
+                <div>
+                  <div className="label-mono mb-1">System Status</div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-sentinel-green pulse-dot"></span>
+                    <span className="font-mono text-[11px] text-sentinel-green tracking-wider font-semibold">OPERATIONAL</span>
+                  </div>
+                  <div className="font-mono text-[10px] text-text-muted">v1.0.0</div>
+                </div>
+              ) : (
+                <div className="flex justify-center">
+                  <span className="w-2 h-2 rounded-full bg-sentinel-green pulse-dot"></span>
+                </div>
+              )}
+            </div>
+          </aside>
+
+          {/* MAIN AREA */}
+          <div className="flex flex-col flex-1 min-w-0 h-full overflow-hidden">
+            {/* TOP BAR */}
+            <header className="h-12 bg-bg-panel border-b border-border-subtle flex items-center justify-between px-4 shrink-0">
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-xs text-text-muted tracking-wider uppercase">Security Operations Center</span>
+                <span className="text-border-default">|</span>
+                <span className="font-mono text-xs text-text-secondary tracking-widest uppercase font-medium">{page}</span>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-sentinel-green blink"></span>
+                  <span className="font-mono text-xs text-sentinel-green tracking-widest">LIVE</span>
+                  <span className="font-mono text-xs text-text-muted">Monitoring</span>
+                </div>
+                <div className="h-4 w-px bg-border-default"></div>
+                <div className="font-mono text-xs text-text-muted tracking-wider">
+                  {time.toLocaleTimeString('en-US', { hour12: false })}
+                </div>
+                <div className="h-4 w-px bg-border-default"></div>
+                <button className="relative text-text-muted hover:text-text-primary p-1">
+                  <IconBell size={15} />
+                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-sentinel-red text-white text-[8px] font-mono rounded-full flex items-center justify-center">11</span>
+                </button>
+                <div className="w-6 h-6 rounded bg-bg-surface border border-border-default flex items-center justify-center text-text-muted">
+                  <IconUser size={13} />
+                </div>
+              </div>
+            </header>
+
+            {/* CONTENT ROUTER */}
+            <main className="flex-1 overflow-y-auto p-5 no-scrollbar">
+              {/* PAGE 1: OVERVIEW */}
+              {page === 'overview' && (
+                <div className="flex flex-col gap-5">
+                  <div>
+                    <div className="label-section mb-1">Security Operations Center</div>
+                    <h1 className="font-mono text-lg font-semibold text-text-primary">Threat Visibility Dashboard</h1>
+                    <p className="font-mono text-xs text-text-muted">Threat visibility. Evidence-driven analysis.</p>
+                  </div>
+
+                  {/* 4 Compact Metrics */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="panel p-4 flex flex-col gap-2">
+                      <div className="flex justify-between items-center"><span className="label-mono">Threats Analyzed</span><IconShield size={14} className="text-sentinel-accent" /></div>
+                      <div className="flex justify-between items-end">
+                        <span className="font-mono text-2xl font-semibold text-text-primary">1,284</span>
+                        <span className="font-mono text-xs text-sentinel-green">+12.4%</span>
+                      </div>
+                    </div>
+                    <div className="panel p-4 flex flex-col gap-2">
+                      <div className="flex justify-between items-center"><span className="label-mono">High Risk</span><IconShield size={14} className="text-sentinel-red" /></div>
+                      <div className="flex justify-between items-end">
+                        <span className="font-mono text-2xl font-semibold text-sentinel-red">37</span>
+                        <span className="font-mono text-xs text-sentinel-red">+3</span>
+                      </div>
+                    </div>
+                    <div className="panel p-4 flex flex-col gap-2">
+                      <div className="flex justify-between items-center"><span className="label-mono">Suspicious</span><IconShield size={14} className="text-sentinel-orange" /></div>
+                      <div className="flex justify-between items-end">
+                        <span className="font-mono text-2xl font-semibold text-sentinel-orange">126</span>
+                        <span className="font-mono text-xs text-sentinel-green">-8</span>
+                      </div>
+                    </div>
+                    <div className="panel p-4 flex flex-col gap-2">
+                      <div className="flex justify-between items-center"><span className="label-mono">Active Alerts</span><IconAlerts size={14} className="text-sentinel-red" /></div>
+                      <div className="flex justify-between items-end">
+                        <span className="font-mono text-2xl font-semibold text-sentinel-red">11</span>
+                        <span className="font-mono text-xs text-sentinel-red">+2</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Threat Activity & Distribution Grid */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    {/* Activity SVG Chart */}
+                    <div className="panel p-4 lg:col-span-2 flex flex-col">
+                      <div className="mb-3">
+                        <div className="label-section">Threat Activity</div>
+                        <div className="font-mono text-xs text-text-muted">Detection activity — last 24 hours</div>
+                      </div>
+                      <div className="h-56 w-full pt-4">
+                        <svg className="w-full h-full" viewBox="0 0 500 180" preserveAspectRatio="none">
+                          <defs>
+                            <linearGradient id="redGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#ef4444" stopOpacity="0.3"/>
+                              <stop offset="100%" stopColor="#ef4444" stopOpacity="0"/>
+                            </linearGradient>
+                          </defs>
+                          {/* Grid lines */}
+                          <line x1="0" y1="30" x2="500" y2="30" stroke="#1e2330" strokeDasharray="2 4" />
+                          <line x1="0" y1="80" x2="500" y2="80" stroke="#1e2330" strokeDasharray="2 4" />
+                          <line x1="0" y1="130" x2="500" y2="130" stroke="#1e2330" strokeDasharray="2 4" />
+                          
+                          {/* Safe Line */}
+                          <path d="M0,130 Q100,100 200,80 T400,90 T500,70" fill="none" stroke="#22c55e" strokeWidth="1.5" />
+                          {/* Suspicious Line */}
+                          <path d="M0,150 Q100,140 200,120 T400,110 T500,95" fill="none" stroke="#f97316" strokeWidth="1.5" />
+                          {/* High Risk Area & Line */}
+                          <path d="M0,165 Q100,155 200,145 T350,115 T500,80 L500,180 L0,180 Z" fill="url(#redGrad)" />
+                          <path d="M0,165 Q100,155 200,145 T350,115 T500,80" fill="none" stroke="#ef4444" strokeWidth="2" />
+                        </svg>
+                      </div>
+                      <div className="flex justify-end gap-6 pt-2 font-mono text-[10px]">
+                        <span className="text-green-400">● Safe</span>
+                        <span className="text-orange-400">● Suspicious</span>
+                        <span className="text-red-400">● High Risk</span>
+                      </div>
+                    </div>
+
+                    {/* Threat Distribution */}
+                    <div className="panel p-4 flex flex-col">
+                      <div className="mb-3">
+                        <div className="label-section">Threat Distribution</div>
+                        <div className="font-mono text-xs text-text-muted">Category breakdown</div>
+                      </div>
+                      <div className="flex-1 flex flex-col justify-center gap-3">
+                        {[
+                          { name: 'Phishing', count: 412, pct: 32.1, color: '#ef4444' },
+                          { name: 'Malicious URL', count: 298, pct: 23.2, color: '#f97316' },
+                          { name: 'Suspicious IP', count: 201, pct: 15.7, color: '#eab308' },
+                          { name: 'Credential Attack', count: 178, pct: 13.9, color: '#ef4444' },
+                          { name: 'Malware', count: 132, pct: 10.3, color: '#dc2626' },
+                        ].map(item => (
+                          <div key={item.name} className="flex flex-col gap-1">
+                            <div className="flex justify-between font-mono text-xs">
+                              <span className="text-text-secondary">{item.name}</span>
+                              <span className="text-text-muted">{item.count} ({item.pct}%)</span>
+                            </div>
+                            <div className="h-1.5 bg-bg-surface rounded-full overflow-hidden">
+                              <div className="h-full rounded-full" style={{ width: `${item.pct}%`, backgroundColor: item.color }}></div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Live Security Feed */}
+                  <div className="panel">
+                    <div className="p-4 border-b border-border-subtle flex justify-between items-center">
+                      <div>
+                        <div className="label-section">Live Security Feed</div>
+                        <div className="font-mono text-xs text-text-muted">Real-time event stream</div>
+                      </div>
+                      <span className="font-mono text-xs text-sentinel-green flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 bg-sentinel-green rounded-full blink"></span> STREAMING
+                      </span>
+                    </div>
+                    <div className="divide-y divide-border-subtle/50 font-mono text-xs">
+                      {threatEvents.map(ev => (
+                        <div key={ev.id} className="grid grid-cols-12 px-4 py-3 hover:bg-bg-hover items-center">
+                          <span className="col-span-2 text-text-muted text-[11px]">{ev.timestamp}</span>
+                          <span className="col-span-2"><StatusBadge status={ev.severity} /></span>
+                          <span className="col-span-5 text-text-secondary">{ev.event}</span>
+                          <span className="col-span-2 text-text-muted text-[11px] truncate">{ev.target}</span>
+                          <span className="col-span-1 text-right text-text-muted text-[10px]">{ev.status}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* PAGE 2: THREAT ANALYZER */}
+              {page === 'analyzer' && (
+                <div className="flex flex-col gap-5">
+                  <div>
+                    <div className="label-section mb-1">Threat Analyzer</div>
+                    <h1 className="font-mono text-lg font-semibold text-text-primary">Inspect Suspicious Digital Artifacts</h1>
+                  </div>
+
+                  {/* Analysis Input Panel */}
+                  <div className="panel">
+                    <div className="flex border-b border-border-subtle font-mono text-xs">
+                      {['URL', 'MESSAGE', 'IP', 'FILE'].map(t => (
+                        <button
+                          key={t}
+                          onClick={() => setAnalyzerTab(t)}
+                          className={`px-5 py-3 border-b-2 uppercase tracking-wider ${
+                            analyzerTab === t ? 'border-sentinel-red text-text-primary bg-bg-surface font-medium' : 'border-transparent text-text-muted hover:text-text-secondary'
+                          }`}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="p-4 flex flex-col gap-4">
+                      <textarea
+                        value={analyzerInput}
+                        onChange={e => setAnalyzerInput(e.target.value)}
+                        placeholder={
+                          analyzerTab === 'URL' ? 'Paste suspicious URL (e.g. https://example-login.com/auth)' :
+                          analyzerTab === 'MESSAGE' ? 'Paste suspicious email or message body...' :
+                          analyzerTab === 'IP' ? 'Enter IP address (e.g. 185.220.101.47)' :
+                          'Enter file hash or drag file...'
+                        }
+                        className="input-field h-24 resize-none"
+                      />
+                      <div className="flex justify-between items-center">
+                        <span className="font-mono text-[10px] text-text-muted">Target ready for deep inspection</span>
+                        <button
+                          onClick={runAnalysis}
+                          disabled={analyzerState === 'analyzing'}
+                          className="btn-primary flex items-center gap-2"
+                        >
+                          {analyzerState === 'analyzing' ? 'SCANNING ARTIFACT...' : 'RUN ANALYSIS'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Analysis Results Display */}
+                  {(analyzerState === 'analyzing' || analyzerState === 'done') && (
+                    <div className="flex flex-col gap-5">
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                        {/* Radial Risk Score */}
+                        <div className="panel p-5 flex flex-col items-center justify-center text-center">
+                          <div className="relative w-36 h-36 flex items-center justify-center my-2">
+                            <svg className="w-full h-full rotate-[-90deg]">
+                              <circle cx="72" cy="72" r="54" fill="none" stroke="#1e2330" strokeWidth="8"/>
+                              <circle cx="72" cy="72" r="54" fill="none" stroke="#ef4444" strokeWidth="8" strokeDasharray="339" strokeDashoffset="44" strokeLinecap="round"/>
+                            </svg>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                              <span className="font-mono text-4xl font-bold text-sentinel-red">87</span>
+                              <span className="font-mono text-[10px] text-text-muted">/ 100</span>
+                            </div>
+                          </div>
+                          <span className="font-mono text-sm font-semibold text-sentinel-red tracking-wider mt-2">HIGH RISK</span>
+                          <span className="font-mono text-xs text-text-muted mt-1">Confidence: 94.2% · ID: SX-8F21A9</span>
+                          <span className="font-mono text-[11px] text-text-secondary bg-bg-surface px-3 py-1 border border-border-subtle rounded mt-3 truncate max-w-full">
+                            {analysisTarget}
+                          </span>
+                        </div>
+
+                        {/* Pipeline Timeline */}
+                        <div className="panel p-5 lg:col-span-2">
+                          <div className="label-section mb-4">Analysis Pipeline Timeline</div>
+                          <div className="flex flex-col gap-3 font-mono text-xs">
+                            {timelineSteps.map(st => (
+                              <div key={st.id} className="flex items-center gap-3">
+                                <span className="w-5 h-5 rounded-full bg-green-950/40 border border-green-500/40 text-green-400 text-[10px] flex items-center justify-center">✓</span>
+                                <span className="font-medium text-text-primary">{st.label}</span>
+                                <span className="text-text-muted text-[11px]">— {st.sublabel}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Evidence Panel */}
+                      <div className="panel p-5">
+                        <div className="label-section mb-4">WHY WAS THIS FLAGGED? (Evidence Panel)</div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {defaultEvidence.map(item => (
+                            <div key={item.id} className="panel-surface p-4 flex flex-col gap-2">
+                              <div className="flex justify-between items-center">
+                                <span className="font-mono text-xs font-semibold text-text-primary">{item.id}. {item.type}</span>
+                                <span className="font-mono text-xs font-bold text-sentinel-red">+{item.contrib}</span>
+                              </div>
+                              <p className="font-mono text-xs text-text-secondary">{item.description}</p>
+                              <p className="font-mono text-[10px] text-text-muted">{item.detail}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* PAGE 3: ALERT CENTER */}
+              {page === 'alerts' && (
+                <div className="flex flex-col gap-5">
+                  <div className="flex justify-between items-end">
+                    <div>
+                      <div className="label-section mb-1">Alert Center</div>
+                      <h1 className="font-mono text-lg font-semibold text-text-primary">Active Security Alerts</h1>
+                    </div>
+                    <div className="flex gap-2 font-mono text-xs">
+                      {['ALL', 'HIGH', 'SUSPICIOUS', 'RESOLVED'].map(f => (
+                        <button
+                          key={f}
+                          onClick={() => setAlertFilter(f)}
+                          className={`px-3 py-1.5 rounded border ${alertFilter === f ? 'bg-bg-hover text-text-primary border-border-default' : 'text-text-muted border-transparent'}`}
+                        >
+                          {f}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="panel">
+                    <div className="p-3 border-b border-border-subtle">
+                      <input
+                        type="text"
+                        value={alertSearch}
+                        onChange={e => setAlertSearch(e.target.value)}
+                        placeholder="Search alerts by target or detection..."
+                        className="input-field text-xs h-8"
+                      />
+                    </div>
+                    <div className="divide-y divide-border-subtle font-mono text-xs">
+                      {alertsList
+                        .filter(a => alertFilter === 'ALL' || a.severity === alertFilter || a.status === alertFilter)
+                        .filter(a => !alertSearch || a.target.toLowerCase().includes(alertSearch.toLowerCase()) || a.detection.toLowerCase().includes(alertSearch.toLowerCase()))
+                        .map(a => (
+                          <div key={a.id} className="grid grid-cols-12 px-4 py-3 hover:bg-bg-hover items-center">
+                            <span className="col-span-2"><StatusBadge status={a.severity} /></span>
+                            <span className="col-span-2 text-sentinel-accent">{a.id}</span>
+                            <span className="col-span-4 text-text-secondary">{a.detection}</span>
+                            <span className="col-span-2 text-text-muted truncate">{a.target}</span>
+                            <span className="col-span-1 text-text-muted text-[10px]">{a.timeAgo}</span>
+                            <span className="col-span-1 text-right font-semibold text-sentinel-red">{a.riskScore}</span>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* PAGE 4: ACTIVITY */}
+              {page === 'activity' && (
+                <div className="flex flex-col gap-5">
+                  <div>
+                    <div className="label-section mb-1">Activity Log</div>
+                    <h1 className="font-mono text-lg font-semibold text-text-primary">Analyst Activity</h1>
+                  </div>
+
+                  <div className="panel">
+                    <div className="divide-y divide-border-subtle font-mono text-xs">
+                      {activityRecords.map(r => (
+                        <div key={r.id} className="grid grid-cols-12 px-4 py-3 hover:bg-bg-hover items-center">
+                          <span className="col-span-2 text-text-muted">{r.timestamp}</span>
+                          <span className="col-span-2 text-sentinel-accent">{r.id}</span>
+                          <span className="col-span-2 text-text-secondary">{r.analyst}</span>
+                          <span className="col-span-3 text-text-secondary truncate">{r.target}</span>
+                          <span className="col-span-2"><StatusBadge status={r.severity} /></span>
+                          <span className="col-span-1 text-right text-text-muted text-[10px]">{r.action}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* PAGE 5: INVESTIGATION */}
+              {page === 'investigation' && (
+                <div className="flex flex-col gap-5 h-full">
+                  <div>
+                    <div className="label-section mb-1">Investigation</div>
+                    <h1 className="font-mono text-lg font-semibold text-text-primary">Threat Relationship Graph</h1>
+                  </div>
+
+                  <div className="panel p-6 flex-1 flex flex-col items-center justify-center min-h-[420px] relative overflow-hidden bg-bg-base">
+                    {/* SVG Threat Node Graph */}
+                    <svg className="w-full h-96" viewBox="0 0 600 320">
+                      {/* Edges */}
+                      <line x1="300" y1="50" x2="150" y2="140" stroke="#252b3a" strokeWidth="2" />
+                      <line x1="300" y1="50" x2="300" y2="140" stroke="#252b3a" strokeWidth="2" />
+                      <line x1="300" y1="50" x2="450" y2="140" stroke="#252b3a" strokeWidth="2" />
+                      <line x1="150" y1="140" x2="300" y2="240" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="4" />
+                      <line x1="300" y1="140" x2="300" y2="240" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="4" />
+                      <line x1="450" y1="140" x2="300" y2="240" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="4" />
+
+                      {/* Nodes */}
+                      <g transform="translate(240, 30)">
+                        <rect width="120" height="40" rx="3" fill="#141720" stroke="#ef4444" strokeWidth="1.5"/>
+                        <text x="60" y="18" fill="#ef4444" fontSize="10" fontFamily="JetBrains Mono" textAnchor="middle" fontWeight="bold">TARGET</text>
+                        <text x="60" y="30" fill="#e2e8f0" fontSize="9" fontFamily="JetBrains Mono" textAnchor="middle">example-login.com</text>
+                      </g>
+
+                      <g transform="translate(90, 120)">
+                        <rect width="120" height="40" rx="3" fill="#141720" stroke="#ef4444" strokeWidth="1.5"/>
+                        <text x="60" y="18" fill="#ef4444" fontSize="10" fontFamily="JetBrains Mono" textAnchor="middle" fontWeight="bold">DOMAIN</text>
+                        <text x="60" y="30" fill="#94a3b8" fontSize="9" fontFamily="JetBrains Mono" textAnchor="middle">Age: 2d</text>
+                      </g>
+
+                      <g transform="translate(240, 120)">
+                        <rect width="120" height="40" rx="3" fill="#141720" stroke="#f97316" strokeWidth="1.5"/>
+                        <text x="60" y="18" fill="#f97316" fontSize="10" fontFamily="JetBrains Mono" textAnchor="middle" fontWeight="bold">URL ENTROPY</text>
+                        <text x="60" y="30" fill="#94a3b8" fontSize="9" fontFamily="JetBrains Mono" textAnchor="middle">4.8 bits</text>
+                      </g>
+
+                      <g transform="translate(390, 120)">
+                        <rect width="120" height="40" rx="3" fill="#141720" stroke="#ef4444" strokeWidth="1.5"/>
+                        <text x="60" y="18" fill="#ef4444" fontSize="10" fontFamily="JetBrains Mono" textAnchor="middle" fontWeight="bold">IP ADDRESS</text>
+                        <text x="60" y="30" fill="#94a3b8" fontSize="9" fontFamily="JetBrains Mono" textAnchor="middle">185.220.101.47</text>
+                      </g>
+
+                      <g transform="translate(240, 220)">
+                        <rect width="120" height="45" rx="3" fill="#0f1117" stroke="#ef4444" strokeWidth="2"/>
+                        <text x="60" y="18" fill="#ef4444" fontSize="11" fontFamily="JetBrains Mono" textAnchor="middle" fontWeight="bold">RISK SCORE</text>
+                        <text x="60" y="34" fill="#ef4444" fontSize="13" fontFamily="JetBrains Mono" textAnchor="middle" fontWeight="bold">87 / 100</text>
+                      </g>
+                    </svg>
+                  </div>
+                </div>
+              )}
+
+              {/* PAGE 6: REPORTS */}
+              {page === 'reports' && (
+                <div className="flex flex-col gap-5">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <div className="label-section mb-1">Reports</div>
+                      <h1 className="font-mono text-lg font-semibold text-text-primary">Threat Analysis Report</h1>
+                    </div>
+                    <button onClick={exportReport} className="btn-primary">
+                      EXPORT REPORT (.TXT)
+                    </button>
+                  </div>
+
+                  <div className="panel p-6 font-mono text-xs flex flex-col gap-4">
+                    <div className="border-b border-border-subtle pb-4">
+                      <div className="text-text-muted mb-1">SUMMARY</div>
+                      <div className="text-base text-text-primary font-semibold">TARGET: {analysisTarget}</div>
+                      <div className="text-sentinel-red text-sm font-bold mt-1">RISK SCORE: 87/100 (HIGH RISK)</div>
+                    </div>
+
+                    <div>
+                      <div className="label-section mb-2">RECOMMENDED ACTIONS</div>
+                      <ol className="list-decimal list-inside text-text-secondary space-y-1">
+                        <li>Block all perimeter traffic to domain.</li>
+                        <li>Inspect internal hosts with active connections.</li>
+                        <li>Reset user credentials for affected accounts.</li>
+                        <li>Submit domain for registrar takedown.</li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </main>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

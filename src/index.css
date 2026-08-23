@@ -1,0 +1,194 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: #09090b;
+    color: #e2e8f0;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0f1117;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #252b3a;
+    border-radius: 2px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2e3650;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply bg-bg-panel border border-border-subtle rounded-sm;
+  }
+
+  .panel-surface {
+    @apply bg-bg-surface border border-border-subtle rounded-sm;
+  }
+
+  .label-mono {
+    @apply font-mono text-xs tracking-widest uppercase text-text-muted;
+  }
+
+  .label-section {
+    @apply font-mono text-xs tracking-widest uppercase text-text-secondary font-medium;
+  }
+
+  .risk-high {
+    @apply text-sentinel-red;
+  }
+
+  .risk-suspicious {
+    @apply text-sentinel-orange;
+  }
+
+  .risk-safe {
+    @apply text-sentinel-green;
+  }
+
+  .badge-high {
+    @apply bg-sentinel-red/10 text-sentinel-red border border-sentinel-red/20 font-mono text-xs px-2 py-0.5 rounded-sm tracking-wider;
+  }
+
+  .badge-suspicious {
+    @apply bg-sentinel-orange/10 text-sentinel-orange border border-sentinel-orange/20 font-mono text-xs px-2 py-0.5 rounded-sm tracking-wider;
+  }
+
+  .badge-safe {
+    @apply bg-sentinel-green/10 text-sentinel-green border border-sentinel-green/20 font-mono text-xs px-2 py-0.5 rounded-sm tracking-wider;
+  }
+
+  .badge-resolved {
+    @apply bg-slate-700/30 text-slate-400 border border-slate-700/40 font-mono text-xs px-2 py-0.5 rounded-sm tracking-wider;
+  }
+
+  .badge-investigating {
+    @apply bg-sentinel-accent/10 text-sentinel-accent border border-sentinel-accent/20 font-mono text-xs px-2 py-0.5 rounded-sm tracking-wider;
+  }
+
+  .btn-primary {
+    @apply bg-sentinel-red/90 hover:bg-sentinel-red text-white font-mono text-sm tracking-widest uppercase px-6 py-2.5 rounded-sm transition-all duration-150 border border-sentinel-red/50 hover:border-sentinel-red hover:shadow-glow-red;
+  }
+
+  .btn-secondary {
+    @apply bg-bg-surface hover:bg-bg-hover text-text-secondary hover:text-text-primary font-mono text-xs tracking-wider uppercase px-4 py-2 rounded-sm transition-all duration-150 border border-border-default;
+  }
+
+  .input-field {
+    @apply bg-bg-surface border border-border-default text-text-primary placeholder-text-muted font-mono text-sm rounded-sm px-3 py-2 focus:outline-none focus:border-sentinel-accent/50 transition-colors duration-150 w-full;
+  }
+
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2 rounded-sm text-text-muted hover:text-text-primary hover:bg-bg-hover transition-all duration-150 font-mono text-xs tracking-wider uppercase cursor-pointer;
+  }
+
+  .nav-item-active {
+    @apply flex items-center gap-3 px-3 py-2 rounded-sm text-text-primary bg-bg-hover border-l-2 border-sentinel-red font-mono text-xs tracking-wider uppercase cursor-pointer;
+  }
+
+  .divider {
+    @apply border-t border-border-subtle;
+  }
+
+  .metric-card {
+    @apply panel p-4 hover:border-border-default transition-all duration-200 cursor-default;
+  }
+
+  .evidence-number {
+    @apply font-mono text-xs text-text-muted w-6 shrink-0 pt-0.5;
+  }
+}
+
+@layer utilities {
+  .text-glow-red {
+    text-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+  }
+
+  .text-glow-green {
+    text-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+  }
+
+  .text-glow-orange {
+    text-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+  }
+
+  .border-glow-red {
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.15), inset 0 0 12px rgba(239, 68, 68, 0.03);
+  }
+
+  .border-glow-green {
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.12);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* React Flow Overrides */
+.react-flow__background {
+  background-color: #09090b !important;
+}
+
+.react-flow__node {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Animated scanner line */
+@keyframes scanLine {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+.scan-line {
+  animation: scanLine 2s linear infinite;
+}
+
+/* Pulse dot */
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+.pulse-dot {
+  animation: pulseDot 2s ease-in-out infinite;
+}
+
+/* Blink */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.blink {
+  animation: blink 1.5s ease-in-out infinite;
+}
