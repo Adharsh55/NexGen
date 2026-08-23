@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SENTINEL-X | Analyst Authentication</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-base': '#09090b',
+            'bg-panel': '#0f1117',
+            'bg-surface': '#141720',
+            'bg-hover': '#1a1f2e',
+            'border-subtle': '#1e2330',
+            'border-default': '#252b3a',
+            'text-primary': '#e2e8f0',
+            'text-secondary': '#94a3b8',
+            'text-muted': '#475569',
+            'sentinel-green': '#22c55e',
+            'sentinel-orange': '#f97316',
+            'sentinel-red': '#ef4444',
+            'sentinel-accent': '#38bdf8',
+          },
+          fontFamily: {
+            mono: ['JetBrains Mono', 'monospace'],
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom styles -->
+  <style>
+    body {
+      background-color: #09090b;
+      color: #e2e8f0;
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+      margin: 0;
+      height: 100vh;
+    }
+
+    .cyber-bg {
+      background-color: #09090b;
+      background-image: 
+        radial-gradient(circle at 50% 30%, rgba(239, 68, 68, 0.12) 0%, transparent 65%),
+        radial-gradient(circle at 80% 80%, rgba(56, 189, 248, 0.05) 0%, transparent 50%),
+        linear-gradient(to right, rgba(30, 35, 48, 0.25) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(30, 35, 48, 0.25) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+    }
+
+    .panel { background-color: rgba(15, 17, 23, 0.9); backdrop-filter: blur(16px); border: 1px solid #252b3a; border-radius: 4px; }
+    .panel-surface { background-color: rgba(20, 23, 32, 0.9); backdrop-filter: blur(16px); border: 1px solid #1e2330; border-radius: 4px; }
+    .btn-primary { background-color: rgba(239, 68, 68, 0.9); color: #ffffff; font-family: 'JetBrains Mono', monospace; font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; padding: 12px 24px; border-radius: 3px; border: 1px solid rgba(239, 68, 68, 0.6); transition: all 0.15s; cursor: pointer; }
+    .btn-primary:hover { background-color: #ef4444; border-color: #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
+    .input-field { background-color: #141720; border: 1px solid #252b3a; color: #e2e8f0; font-family: 'JetBrains Mono', monospace; font-size: 13px; border-radius: 3px; padding: 10px 14px; outline: none; width: 100%; }
+    .input-field:focus { border-color: rgba(56, 189, 248, 0.6); box-shadow: 0 0 10px rgba(56, 189, 248, 0.15); }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .blink { animation: blink 1.5s ease-in-out infinite; }
+    .hero-glow { box-shadow: 0 0 60px rgba(239, 68, 68, 0.25); }
+  </style>
+
+  <!-- React & Babel Standalone -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="cyber-bg flex items-center justify-center min-h-screen p-4">
+  <div id="root" class="w-full flex items-center justify-center"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    const IconShield = ({ size=16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2L4 6v6c0 5.1 3.4 9.9 8 11 4.6-1.1 8-5.9 8-11V6L12 2z"/>
+      </svg>
+    );
+
+    const IconUser = ({ size=16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    );
+
+    const IconKey = ({ size=16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.778-7.778Zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+    );
+
+    const IconLock = ({ size=16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    );
+
+    function LoginPage() {
+      const [email, setEmail] = useState('analyst@sentinel-x.io');
+      const [password, setPassword] = useState('••••••••••••');
+      const [clearance, setClearance] = useState('Level 3 — Lead Commander');
+      const [statusMsg, setStatusMsg] = useState('');
+
+      const handleLogin = (e) => {
+        e.preventDefault();
+        setStatusMsg('VERIFYING MFA SECURITY TOKEN...');
+        setTimeout(() => {
+          setStatusMsg('DECRYPTING WORKSTATION KEYS...');
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1000);
+        }, 1000);
+      };
+
+      return (
+        <div className="w-full max-w-md panel p-8 flex flex-col gap-6 hero-glow border border-border-default">
+          {/* Logo */}
+          <div className="flex flex-col items-center text-center">
+            <div className="w-16 h-16 rounded-full bg-red-950/40 border border-sentinel-red/50 flex items-center justify-center text-sentinel-red mb-3">
+              <IconShield size={36} />
+            </div>
+            <h1 className="font-mono text-2xl font-bold tracking-widest text-text-primary">
+              SENTINEL<span className="text-sentinel-red">-X</span>
+            </h1>
+            <div className="font-mono text-[10px] text-sentinel-accent tracking-widest uppercase mt-1">
+              SOC ANALYST AUTHENTICATION TERMINAL
+            </div>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleLogin} className="flex flex-col gap-4 font-mono text-xs">
+            <div>
+              <label className="block text-text-muted text-[11px] mb-1.5 uppercase tracking-wider">
+                Analyst Clearance ID / Email
+              </label>
+              <div className="relative">
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="analyst@sentinel-x.io"
+                  className="input-field py-2.5 pl-9"
+                />
+                <span className="absolute left-3 top-3 text-text-muted"><IconUser size={14} /></span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-text-muted text-[11px] mb-1.5 uppercase tracking-wider">
+                Security Access Key / Password
+              </label>
+              <div className="relative">
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  className="input-field py-2.5 pl-9"
+                />
+                <span className="absolute left-3 top-3 text-text-muted"><IconKey size={14} /></span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-text-muted text-[11px] mb-1.5 uppercase tracking-wider">
+                Security Clearance Level
+              </label>
+              <select
+                value={clearance}
+                onChange={e => setClearance(e.target.value)}
+                className="input-field py-2.5 bg-bg-surface text-text-primary outline-none cursor-pointer"
+              >
+                <option value="Level 1 — Triage Operator">Level 1 — Triage Operator</option>
+                <option value="Level 2 — Threat Investigator">Level 2 — Threat Investigator</option>
+                <option value="Level 3 — Lead Commander">Level 3 — Lead Commander</option>
+              </select>
+            </div>
+
+            <div className="flex justify-between items-center text-[11px] text-text-muted pt-1">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" defaultChecked className="rounded border-border-default accent-sentinel-red" />
+                <span>Persist Session Token</span>
+              </label>
+              <a href="#" className="text-sentinel-accent hover:underline">Reset Key?</a>
+            </div>
+
+            {statusMsg && (
+              <div className="panel-surface p-3 text-center text-sentinel-accent text-xs flex items-center justify-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-sentinel-accent blink"></span>
+                <span>{statusMsg}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={!!statusMsg}
+              className="btn-primary py-3 text-sm font-semibold tracking-widest mt-2 flex items-center justify-center gap-2"
+            >
+              <IconLock size={16} />
+              <span>AUTHENTICATE ANALYST</span>
+            </button>
+          </form>
+
+          {/* Footer */}
+          <div className="text-center font-mono text-[10px] text-text-muted border-t border-border-subtle pt-4">
+            RESTRICTED SYSTEM — AUTHORIZED SOC PERSONNEL ONLY
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<LoginPage />);
+  </script>
+</body>
+</html>
