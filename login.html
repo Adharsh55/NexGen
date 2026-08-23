@@ -198,46 +198,82 @@
     );
 
     function AuthTerminal() {
-      const [authTab, setAuthTab] = useState('register'); // Default: 'register' comes FIRST as requested!
+      const [authTab, setAuthTab] = useState('register');
       
       // Login Fields
-      const [loginEmail, setLoginEmail] = useState('analyst@sentinel-x.io');
-      const [loginPassword, setLoginPassword] = useState('••••••••••••');
+      const [loginEmail, setLoginEmail] = useState('');
+      const [loginPassword, setLoginPassword] = useState('');
 
       // Register Fields
-      const [regName, setRegName] = useState('');
       const [regEmail, setRegEmail] = useState('');
       const [regPassword, setRegPassword] = useState('');
-      const [regClearance, setRegClearance] = useState('Level 2 — Threat Investigator');
+      const [regClearance, setRegClearance] = useState('Level 3 — Lead Commander');
 
       const [statusMsg, setStatusMsg] = useState('');
 
-      const handleLoginSubmit = (e) => {
+      // BACKEND LOGIN HANDLER
+      const handleLoginSubmit = async (e) => {
         e.preventDefault();
-        setStatusMsg('INITIALIZING BIOMETRIC SCAN...');
-        setTimeout(() => {
-          setStatusMsg('VERIFYING MFA SECURITY TOKEN...');
-          setTimeout(() => {
-            setStatusMsg('DECRYPTING COMMAND WORKSTATION...');
+        setStatusMsg('COMMUNICATING WITH SQLITE DATABASE...');
+
+        try {
+          const response = await fetch('http://localhost:5000/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: loginEmail, password: loginPassword }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            setStatusMsg('ACCESS GRANTED. REDIRECTING...');
+            
+            // Clear input fields upon success
+            setLoginEmail('');
+            setLoginPassword('');
+
             setTimeout(() => {
               window.location.href = 'index.html';
-            }, 800);
-          }, 800);
-        }, 800);
+            }, 1000);
+          } else {
+            setStatusMsg(`AUTH FAILED: ${data.message}`);
+          }
+        } catch (err) {
+          setStatusMsg('ERROR: Python backend offline.');
+        }
       };
 
-      const handleRegisterSubmit = (e) => {
+      // BACKEND REGISTRATION HANDLER
+      const handleRegisterSubmit = async (e) => {
         e.preventDefault();
-        setStatusMsg('GENERATING ANALYST CREDENTIALS...');
-        setTimeout(() => {
-          setStatusMsg('REGISTERING CLEARANCE LEVEL AT SOC GATEWAY...');
-          setTimeout(() => {
-            setStatusMsg('ACCOUNT CREATED! LOGGING IN...');
+        setStatusMsg('HASHING CREDENTIALS & SAVING TO DB...');
+
+        try {
+          const response = await fetch('http://localhost:5000/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: regEmail, password: regPassword, clearance: regClearance }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            setStatusMsg('ACCOUNT CREATED! SWITCHING TO SIGN IN...');
+            
+            // Clear registration fields and auto-switch to login tab
+            setRegEmail('');
+            setRegPassword('');
+
             setTimeout(() => {
-              window.location.href = 'index.html';
-            }, 800);
-          }, 800);
-        }, 800);
+              setAuthTab('login');
+              setStatusMsg('');
+            }, 1200);
+          } else {
+            setStatusMsg(`ERROR: ${data.message}`);
+          }
+        } catch (err) {
+          setStatusMsg('ERROR: Python backend offline.');
+        }
       };
 
       return (
@@ -248,7 +284,7 @@
             <span className="flex items-center gap-1.5 text-sentinel-green font-bold">
               <span className="w-1.5 h-1.5 rounded-full bg-sentinel-green pulse-glow"></span> GATEWAY: ONLINE
             </span>
-            <span className="text-sentinel-cyan font-semibold">ENCRYPTION: AES-256</span>
+            <span className="text-sentinel-cyan font-semibold">ENCRYPTION: SHA-256</span>
             <span className="text-text-muted">NODE: SX-99</span>
           </div>
 
@@ -273,7 +309,7 @@
           <div className="grid grid-cols-2 p-1 bg-bg-surface border border-border-highlight rounded-xl font-mono text-xs">
             <button
               type="button"
-              onClick={() => setAuthTab('register')}
+              onClick={() => { setAuthTab('register'); setStatusMsg(''); }}
               className={`py-2 rounded-lg font-bold transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
                 authTab === 'register' 
                   ? 'bg-sentinel-cyan text-bg-obsidian shadow-md font-extrabold' 
@@ -286,7 +322,7 @@
             
             <button
               type="button"
-              onClick={() => setAuthTab('login')}
+              onClick={() => { setAuthTab('login'); setStatusMsg(''); }}
               className={`py-2 rounded-lg font-bold transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
                 authTab === 'login' 
                   ? 'bg-sentinel-cyan text-bg-obsidian shadow-md font-extrabold' 
@@ -298,29 +334,12 @@
             </button>
           </div>
 
-          {/* TAB 1: REGISTER FORM (FIRST FOR NEW ANALYSTS) */}
+          {/* TAB 1: REGISTER FORM */}
           {authTab === 'register' && (
             <form onSubmit={handleRegisterSubmit} className="flex flex-col gap-4">
               <div>
                 <label className="block font-mono text-[10px] text-text-secondary mb-1 uppercase tracking-wider font-bold">
-                  Analyst Full Name
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    required
-                    value={regName}
-                    onChange={e => setRegName(e.target.value)}
-                    placeholder="e.g. Alex Mercer"
-                    className="input-field-cyber"
-                  />
-                  <span className="absolute left-3.5 top-3.5 text-text-muted"><IconUser size={16} /></span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-mono text-[10px] text-text-secondary mb-1 uppercase tracking-wider font-bold">
-                  Clearance Email / ID
+                  Analyst Email ID
                 </label>
                 <div className="relative">
                   <input
@@ -328,7 +347,7 @@
                     required
                     value={regEmail}
                     onChange={e => setRegEmail(e.target.value)}
-                    placeholder="alex.mercer@sentinel-x.io"
+                    placeholder="analyst@sentinel-x.io"
                     className="input-field-cyber"
                   />
                   <span className="absolute left-3.5 top-3.5 text-text-muted"><IconUser size={16} /></span>
@@ -337,7 +356,7 @@
 
               <div>
                 <label className="block font-mono text-[10px] text-text-secondary mb-1 uppercase tracking-wider font-bold">
-                  Security Access Key / Password
+                  Create Security Access Key / Password
                 </label>
                 <div className="relative">
                   <input
@@ -345,7 +364,7 @@
                     required
                     value={regPassword}
                     onChange={e => setRegPassword(e.target.value)}
-                    placeholder="Create security key..."
+                    placeholder="••••••••••••"
                     className="input-field-cyber"
                   />
                   <span className="absolute left-3.5 top-3.5 text-text-muted"><IconKey size={16} /></span>
@@ -354,7 +373,7 @@
 
               <div>
                 <label className="block font-mono text-[10px] text-text-secondary mb-1 uppercase tracking-wider font-bold">
-                  Assigned Security Clearance Level
+                  Security Clearance Level
                 </label>
                 <select
                   value={regClearance}
@@ -376,7 +395,6 @@
 
               <button
                 type="submit"
-                disabled={!!statusMsg}
                 className="btn-cyber-auth mt-1 flex items-center justify-center gap-2 py-3"
               >
                 <IconUserPlus size={18} />
@@ -439,7 +457,6 @@
 
               <button
                 type="submit"
-                disabled={!!statusMsg}
                 className="btn-cyber-auth mt-1 flex items-center justify-center gap-2 py-3"
               >
                 <IconFingerprint size={20} />
