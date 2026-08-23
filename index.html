@@ -68,6 +68,9 @@
     @keyframes pulseDot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
     .pulse-dot { animation: pulseDot 2s ease-in-out infinite; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
+    .hero-glow {
+      box-shadow: 0 0 60px rgba(239, 68, 68, 0.12);
+    }
   </style>
 
   <!-- React & Babel Standalone -->
@@ -79,13 +82,16 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+    const { useState, useEffect } = React;
 
     // --- ICONS ---
     const IconShield = ({ size=16, className="" }) => (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
         <path d="M12 2L4 6v6c0 5.1 3.4 9.9 8 11 4.6-1.1 8-5.9 8-11V6L12 2z"/>
       </svg>
+    );
+    const IconHome = ({ size=16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     );
     const IconOverview = ({ size=16 }) => (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
@@ -110,6 +116,9 @@
     );
     const IconUser = ({ size=16 }) => (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    );
+    const IconArrowRight = ({ size=16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
     );
 
     // --- MOCK DATA ---
@@ -175,7 +184,7 @@
 
     // --- APP COMPONENT ---
     function App() {
-      const [page, setPage] = useState('overview');
+      const [page, setPage] = useState('home'); // Default to landing home
       const [time, setTime] = useState(new Date());
       const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -188,9 +197,6 @@
       // Alerts Filter & Search
       const [alertFilter, setAlertFilter] = useState('ALL');
       const [alertSearch, setAlertSearch] = useState('');
-
-      // Activity Search
-      const [actSearch, setActSearch] = useState('');
 
       useEffect(() => {
         const timer = setInterval(() => setTime(new Date()), 1000);
@@ -243,7 +249,10 @@ RECOMMENDED ACTIONS:
           {/* SIDEBAR */}
           <aside className={`flex flex-col h-full bg-bg-panel border-r border-border-subtle shrink-0 transition-all duration-200 ${sidebarCollapsed ? 'w-14' : 'w-52'}`}>
             {/* Logo */}
-            <div className="flex items-center gap-2.5 px-3.5 h-12 border-b border-border-subtle shrink-0">
+            <button 
+              onClick={() => setPage('home')}
+              className="flex items-center gap-2.5 px-3.5 h-12 border-b border-border-subtle shrink-0 hover:bg-bg-hover transition-colors text-left"
+            >
               <div className="text-sentinel-red">
                 <IconShield size={20} />
               </div>
@@ -252,12 +261,13 @@ RECOMMENDED ACTIONS:
                   SENTINEL<span className="text-sentinel-red">-X</span>
                 </span>
               )}
-            </div>
+            </button>
 
             {/* Nav */}
             <nav className="flex-1 py-3 px-2 flex flex-col gap-1 overflow-y-auto no-scrollbar">
               {!sidebarCollapsed && <div className="label-mono px-2 py-1 mb-1">Navigation</div>}
               {[
+                { id: 'home', label: 'Home', icon: <IconHome /> },
                 { id: 'overview', label: 'Overview', icon: <IconOverview /> },
                 { id: 'analyzer', label: 'Threat Analyzer', icon: <IconAnalyzer /> },
                 { id: 'alerts', label: 'Alert Center', icon: <IconAlerts /> },
@@ -332,6 +342,118 @@ RECOMMENDED ACTIONS:
 
             {/* CONTENT ROUTER */}
             <main className="flex-1 overflow-y-auto p-5 no-scrollbar">
+              {/* PAGE 0: CENTERED SENTINEL-X LANDING PAGE */}
+              {page === 'home' && (
+                <div className="flex flex-col items-center justify-center min-h-[calc(100vh-100px)] text-center max-w-4xl mx-auto py-8">
+                  {/* Glowing Shield Icon */}
+                  <div className="w-20 h-20 rounded-full bg-red-950/30 border border-sentinel-red/40 flex items-center justify-center text-sentinel-red mb-6 hero-glow">
+                    <IconShield size={44} />
+                  </div>
+
+                  {/* Centered Sentinel-X Title */}
+                  <h1 className="font-mono text-4xl md:text-5xl font-bold tracking-widest text-text-primary mb-3">
+                    SENTINEL<span className="text-sentinel-red">-X</span>
+                  </h1>
+
+                  <div className="label-mono text-xs tracking-widest text-sentinel-accent mb-4">
+                    ADVANCED CYBERSECURITY THREAT-ANALYSIS PLATFORM
+                  </div>
+
+                  <p className="font-mono text-xs md:text-sm text-text-secondary max-w-2xl leading-relaxed mb-8">
+                    Threat visibility. Evidence-driven analysis. Next-generation Security Operations Center (SOC) workstation designed to inspect digital artifacts, triage active threats, and analyze attack vectors.
+                  </p>
+
+                  {/* Quick Access Feature Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full text-left mb-8">
+                    {/* Threat Analyzer Card */}
+                    <div 
+                      onClick={() => setPage('analyzer')}
+                      className="panel p-5 hover:border-sentinel-red/50 hover:bg-bg-hover transition-all duration-200 cursor-pointer group flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="p-2 rounded bg-red-950/40 text-sentinel-red border border-red-500/20">
+                            <IconAnalyzer size={18} />
+                          </span>
+                          <span className="text-text-muted group-hover:text-sentinel-red transition-colors">
+                            <IconArrowRight size={14} />
+                          </span>
+                        </div>
+                        <h3 className="font-mono text-sm font-semibold text-text-primary mb-1">Threat Analyzer</h3>
+                        <p className="font-mono text-[11px] text-text-muted leading-relaxed">
+                          Inspect suspicious URLs, messages, IP addresses, or file payloads with real-time evidence scoring.
+                        </p>
+                      </div>
+                      <div className="mt-4 font-mono text-[10px] text-sentinel-red tracking-wider uppercase font-semibold">
+                        Launch Analyzer →
+                      </div>
+                    </div>
+
+                    {/* SOC Overview Card */}
+                    <div 
+                      onClick={() => setPage('overview')}
+                      className="panel p-5 hover:border-sentinel-accent/50 hover:bg-bg-hover transition-all duration-200 cursor-pointer group flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="p-2 rounded bg-sky-950/40 text-sentinel-accent border border-sky-500/20">
+                            <IconOverview size={18} />
+                          </span>
+                          <span className="text-text-muted group-hover:text-sentinel-accent transition-colors">
+                            <IconArrowRight size={14} />
+                          </span>
+                        </div>
+                        <h3 className="font-mono text-sm font-semibold text-text-primary mb-1">SOC Overview</h3>
+                        <p className="font-mono text-[11px] text-text-muted leading-relaxed">
+                          24h detection activity telemetry, threat distribution breakdown, and live event monitoring stream.
+                        </p>
+                      </div>
+                      <div className="mt-4 font-mono text-[10px] text-sentinel-accent tracking-wider uppercase font-semibold">
+                        View Dashboard →
+                      </div>
+                    </div>
+
+                    {/* Alert Center Card */}
+                    <div 
+                      onClick={() => setPage('alerts')}
+                      className="panel p-5 hover:border-sentinel-orange/50 hover:bg-bg-hover transition-all duration-200 cursor-pointer group flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="p-2 rounded bg-orange-950/40 text-sentinel-orange border border-orange-500/20">
+                            <IconAlerts size={18} />
+                          </span>
+                          <span className="text-text-muted group-hover:text-sentinel-orange transition-colors">
+                            <IconArrowRight size={14} />
+                          </span>
+                        </div>
+                        <h3 className="font-mono text-sm font-semibold text-text-primary mb-1">Alert Center</h3>
+                        <p className="font-mono text-[11px] text-text-muted leading-relaxed">
+                          Triage, filter, and assign active security alerts with risk scores and detailed telemetry.
+                        </p>
+                      </div>
+                      <div className="mt-4 font-mono text-[10px] text-sentinel-orange tracking-wider uppercase font-semibold">
+                        Open Alerts →
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* System Telemetry Bar */}
+                  <div className="panel-surface w-full p-4 flex flex-wrap justify-between items-center font-mono text-xs gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-sentinel-green pulse-dot"></span>
+                      <span className="text-text-muted">System Status:</span>
+                      <span className="text-sentinel-green font-semibold">OPERATIONAL</span>
+                    </div>
+                    <div className="flex items-center gap-6 text-text-muted text-[11px]">
+                      <span>THREATS ANALYZED: <strong className="text-text-primary">1,284</strong></span>
+                      <span>HIGH RISK: <strong className="text-sentinel-red">37</strong></span>
+                      <span>ACTIVE ALERTS: <strong className="text-sentinel-orange">11</strong></span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* PAGE 1: OVERVIEW */}
               {page === 'overview' && (
                 <div className="flex flex-col gap-5">
@@ -389,16 +511,11 @@ RECOMMENDED ACTIONS:
                               <stop offset="100%" stopColor="#ef4444" stopOpacity="0"/>
                             </linearGradient>
                           </defs>
-                          {/* Grid lines */}
                           <line x1="0" y1="30" x2="500" y2="30" stroke="#1e2330" strokeDasharray="2 4" />
                           <line x1="0" y1="80" x2="500" y2="80" stroke="#1e2330" strokeDasharray="2 4" />
                           <line x1="0" y1="130" x2="500" y2="130" stroke="#1e2330" strokeDasharray="2 4" />
-                          
-                          {/* Safe Line */}
                           <path d="M0,130 Q100,100 200,80 T400,90 T500,70" fill="none" stroke="#22c55e" strokeWidth="1.5" />
-                          {/* Suspicious Line */}
                           <path d="M0,150 Q100,140 200,120 T400,110 T500,95" fill="none" stroke="#f97316" strokeWidth="1.5" />
-                          {/* High Risk Area & Line */}
                           <path d="M0,165 Q100,155 200,145 T350,115 T500,80 L500,180 L0,180 Z" fill="url(#redGrad)" />
                           <path d="M0,165 Q100,155 200,145 T350,115 T500,80" fill="none" stroke="#ef4444" strokeWidth="2" />
                         </svg>
@@ -657,7 +774,6 @@ RECOMMENDED ACTIONS:
                   <div className="panel p-6 flex-1 flex flex-col items-center justify-center min-h-[420px] relative overflow-hidden bg-bg-base">
                     {/* SVG Threat Node Graph */}
                     <svg className="w-full h-96" viewBox="0 0 600 320">
-                      {/* Edges */}
                       <line x1="300" y1="50" x2="150" y2="140" stroke="#252b3a" strokeWidth="2" />
                       <line x1="300" y1="50" x2="300" y2="140" stroke="#252b3a" strokeWidth="2" />
                       <line x1="300" y1="50" x2="450" y2="140" stroke="#252b3a" strokeWidth="2" />
@@ -665,7 +781,6 @@ RECOMMENDED ACTIONS:
                       <line x1="300" y1="140" x2="300" y2="240" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="4" />
                       <line x1="450" y1="140" x2="300" y2="240" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="4" />
 
-                      {/* Nodes */}
                       <g transform="translate(240, 30)">
                         <rect width="120" height="40" rx="3" fill="#141720" stroke="#ef4444" strokeWidth="1.5"/>
                         <text x="60" y="18" fill="#ef4444" fontSize="10" fontFamily="JetBrains Mono" textAnchor="middle" fontWeight="bold">TARGET</text>
